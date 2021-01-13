@@ -7,7 +7,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { isDecimalsValid, isInteger } from '@wallet-utils/validation';
 import { useCoinmarketExchangeFormContext } from '@wallet-hooks/useCoinmarketExchangeForm';
 import { Translation } from '@suite-components';
-import ReceiveCryptoSelect from './ReceiveCryptoSelect';
+import ReceiveCryptoSelect from './SendCryptoSelect';
 import { InputError } from '@wallet-components';
 import Bignumber from 'bignumber.js';
 import { MAX_LENGTH } from '@suite-constants/inputs';
@@ -30,7 +30,7 @@ const StyledInput = styled(Input)`
     border-bottom-right-radius: 0;
 `;
 
-const ReceiveCryptoInput = () => {
+const SendCryptoInput = () => {
     const {
         register,
         errors,
@@ -165,4 +165,4 @@ const ReceiveCryptoInput = () => {
     );
 };
 
-export default ReceiveCryptoInput;
+export default SendCryptoInput;

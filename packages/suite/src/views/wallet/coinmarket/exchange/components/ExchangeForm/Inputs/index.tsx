@@ -3,9 +3,9 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { invityApiSymbolToSymbol } from '@wallet-utils/coinmarket/coinmarketUtils';
 import { useCoinmarketExchangeFormContext } from '@wallet-hooks/useCoinmarketExchangeForm';
-import ReceiveCryptoInput from './ReceiveCryptoInput';
+import SendCryptoInput from './SendCryptoInput';
 import FiatInput from './FiatInput';
-import SendCryptoSelect from './SendCryptoSelect';
+import ReceiveCryptoSelect from './ReceiveCryptoSelect';
 import Buttons from './Buttons';
 
 const Wrapper = styled.div`
@@ -69,7 +69,7 @@ const Inputs = () => {
         <Wrapper>
             <Top>
                 <LeftWrapper>
-                    <ReceiveCryptoInput />
+                    <SendCryptoInput />
                     <Line
                         color={
                             errors.receiveCryptoInput || errors.fiatInput
@@ -83,7 +83,7 @@ const Inputs = () => {
                     <StyledIcon icon="TRANSFER" size={16} />
                 </MiddleWrapper>
                 <RightWrapper>
-                    <SendCryptoSelect />
+                    <ReceiveCryptoSelect />
                 </RightWrapper>
             </Top>
             <Buttons />

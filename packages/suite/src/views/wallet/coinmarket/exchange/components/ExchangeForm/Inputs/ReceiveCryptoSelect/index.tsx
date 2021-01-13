@@ -102,7 +102,7 @@ const buildOptions = (
     return [popular, stable, all];
 };
 
-const SendCryptoSelect = () => {
+const ReceiveCryptoSelect = () => {
     const {
         control,
         setAmountLimits,
@@ -169,4 +169,4 @@ const SendCryptoSelect = () => {
     );
 };
 
-export default SendCryptoSelect;
+export default ReceiveCryptoSelect;
