@@ -133,7 +133,7 @@ const ReceiveCryptoSelect = () => {
                     label: quotesRequest.receive.toUpperCase(),
                     value: quotesRequest.receive.toUpperCase(),
                 } : false}
-                name="sendCryptoSelect"
+                name="receiveCryptoSelect"
                 render={({ onChange, value }) => {
                     return (
                         <Select
