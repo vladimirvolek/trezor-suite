@@ -123,7 +123,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         setIsComposing(true);
         const formValues = getValues();
         const token =
-            data && data.token ? data.token : formValues.receiveCryptoSelect.value || undefined;
+            data && data.token ? data.token : formValues.sendCryptoSelect.value || undefined;
         const feeLevel = feeInfo.levels.find(level => level.label === data.feeLevelLabel);
         const selectedFeeLevel =
             feeLevel || feeInfo.levels.find(level => level.label === selectedFee);
