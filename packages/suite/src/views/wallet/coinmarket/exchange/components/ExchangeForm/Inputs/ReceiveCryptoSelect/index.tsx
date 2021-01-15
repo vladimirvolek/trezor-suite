@@ -129,10 +129,14 @@ const ReceiveCryptoSelect = () => {
         <Wrapper>
             <Controller
                 control={control}
-                defaultValue={quotesRequest ? {
-                    label: quotesRequest.receive.toUpperCase(),
-                    value: quotesRequest.receive.toUpperCase(),
-                } : false}
+                defaultValue={
+                    quotesRequest
+                        ? {
+                              label: quotesRequest.receive.toUpperCase(),
+                              value: quotesRequest.receive.toUpperCase(),
+                          }
+                        : false
+                }
                 name="receiveCryptoSelect"
                 render={({ onChange, value }) => {
                     return (

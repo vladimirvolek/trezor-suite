@@ -33,14 +33,16 @@ const SendCryptoSelect = () => {
         <Controller
             control={control}
             name={sendCryptoSelect}
-            defaultValue={quotesRequest ? {
-                    label: quotesRequest.send.toUpperCase(),
-                    value: quotesRequest.send.toUpperCase(),
-                } : {
-                    label: formatLabel(uppercaseSymbol),
-                    value: uppercaseSymbol,
-
-                }
+            defaultValue={
+                quotesRequest
+                    ? {
+                          label: quotesRequest.send.toUpperCase(),
+                          value: quotesRequest.send.toUpperCase(),
+                      }
+                    : {
+                          label: formatLabel(uppercaseSymbol),
+                          value: uppercaseSymbol,
+                      }
             }
             render={({ onChange, value }) => {
                 return (

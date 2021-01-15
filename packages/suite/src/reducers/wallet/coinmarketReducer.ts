@@ -53,10 +53,16 @@ interface Buy {
     addressVerified?: string;
 }
 
+interface QuoteRequestWithFeeLevel {
+    request: ExchangeTradeQuoteRequest;
+    isMax: boolean;
+    feeLevel: string;
+}
+
 interface Exchange {
     exchangeInfo?: ExchangeInfo;
     exchangeCoinInfo?: ExchangeCoinInfo[];
-    quotesRequest?: ExchangeTradeQuoteRequest;
+    quotesRequest?: QuoteRequestWithFeeLevel;
     fixedQuotes: ExchangeTrade[];
     floatQuotes: ExchangeTrade[];
     transactionId?: string;
