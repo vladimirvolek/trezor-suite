@@ -2,8 +2,12 @@ import { AppState } from '@suite-types';
 import { UseFormMethods } from 'react-hook-form';
 import { Account, Network, CoinFiatRates } from '@wallet-types';
 import { FeeLevel } from 'trezor-connect';
-import { ExchangeTrade, ExchangeTradeQuoteRequest, ExchangeCoinInfo } from 'invity-api';
-import { CoinmarketExchangeAction, ExchangeInfo } from '@wallet-actions/coinmarketExchangeActions';
+import { ExchangeTrade, ExchangeCoinInfo } from 'invity-api';
+import {
+    CoinmarketExchangeAction,
+    ExchangeInfo,
+    QuoteRequestWithFeeLevel,
+} from '@wallet-actions/coinmarketExchangeActions';
 import { TypedValidationRules } from './form';
 import { FeeInfo, PrecomposedTransactionFinal } from '@wallet-types/sendForm';
 
@@ -66,7 +70,7 @@ export type ExchangeFormContextValues = Omit<UseFormMethods<FormState>, 'registe
     selectFee: (feeLevel: FeeLevel['label']) => void;
     updateFiatCurrency: (selectedCurrency: { value: string; label: string }) => void;
     updateReceiveCryptoValue: (fiatValue: string, decimals: number) => void;
-    saveQuoteRequest: (request: ExchangeTradeQuoteRequest) => CoinmarketExchangeAction;
+    saveQuoteRequest: (request: QuoteRequestWithFeeLevel) => CoinmarketExchangeAction;
     saveQuotes: (
         fixedQuotes: ExchangeTrade[],
         floatQuotes: ExchangeTrade[],

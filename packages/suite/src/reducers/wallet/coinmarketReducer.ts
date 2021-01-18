@@ -21,6 +21,7 @@ import {
 import { STORAGE } from '@suite-actions/constants';
 import { Action as SuiteAction } from '@suite-types';
 import { SellInfo } from '@wallet-actions/coinmarketSellActions';
+import { FeeLevel } from 'trezor-connect';
 
 type CommonTrade = {
     date: string;
@@ -55,8 +56,10 @@ interface Buy {
 
 interface QuoteRequestWithFeeLevel {
     request: ExchangeTradeQuoteRequest;
-    isMax: boolean;
-    feeLevel: string;
+    isMax?: boolean;
+    feeLabel: FeeLevel['label'];
+    feePerUnit?: string;
+    
 }
 
 interface Exchange {

@@ -21,8 +21,9 @@ export interface ExchangeInfo {
 
 export interface QuoteRequestWithFeeLevel {
     request: ExchangeTradeQuoteRequest;
-    isMax: boolean;
-    feeLevel: FeeLevel;
+    isMax?: boolean;
+    feeLabel: FeeLevel['label'];
+    feePerUnit?: string;
 }
 
 export type CoinmarketExchangeAction =

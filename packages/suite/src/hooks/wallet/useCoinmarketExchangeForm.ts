@@ -227,7 +227,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
 
         const ok = await compose({ setMax: isMax });
         if (ok) {
-            saveQuoteRequest({ request });
+            saveQuoteRequest({ request, isMax, feeLevel });
             const allQuotes = await invityAPI.getExchangeQuotes(request);
             const limits = getAmountLimits(allQuotes);
 
