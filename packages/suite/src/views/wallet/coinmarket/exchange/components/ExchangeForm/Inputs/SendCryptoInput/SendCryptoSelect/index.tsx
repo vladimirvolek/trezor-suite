@@ -36,8 +36,8 @@ const SendCryptoSelect = () => {
             defaultValue={
                 quotesRequest
                     ? {
-                          label: quotesRequest.send.toUpperCase(),
-                          value: quotesRequest.send.toUpperCase(),
+                          label: quotesRequest.request.send.toUpperCase(),
+                          value: quotesRequest.request.send.toUpperCase(),
                       }
                     : {
                           label: formatLabel(uppercaseSymbol),

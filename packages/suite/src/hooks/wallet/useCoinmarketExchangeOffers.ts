@@ -95,7 +95,7 @@ export const useOffers = (props: Props) => {
             if (!selectedQuote) {
                 invityAPI.createInvityAPIKey(account.descriptor);
                 setCallInProgress(true);
-                const allQuotes = await invityAPI.getExchangeQuotes(quotesRequest);
+                const allQuotes = await invityAPI.getExchangeQuotes(quotesRequest.request);
                 setCallInProgress(false);
                 const [fixedQuotes, floatQuotes] = splitToFixedFloatQuotes(allQuotes, exchangeInfo);
                 setInnerFixedQuotes(fixedQuotes);

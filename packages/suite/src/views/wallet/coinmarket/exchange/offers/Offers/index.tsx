@@ -109,13 +109,15 @@ const Offers = () => {
                                 <SummaryRow>
                                     <Left>
                                         <StyledCoinLogo size={21} symbol={account.symbol} />
-                                        <TextAmount>{quotesRequest.sendStringAmount}</TextAmount>
-                                        <Text>{quotesRequest.send}</Text>
+                                        <TextAmount>
+                                            {quotesRequest.request.sendStringAmount}
+                                        </TextAmount>
+                                        <Text>{quotesRequest.request.send}</Text>
                                         <StyledIcon icon="ARROW_RIGHT_LONG" />
                                         <InvityCoinLogo
-                                            src={`${invityAPI.server}/images/coins/suite/${quotesRequest.receive}.svg`}
+                                            src={`${invityAPI.server}/images/coins/suite/${quotesRequest.request.receive}.svg`}
                                         />
-                                        <Text>{quotesRequest.receive}</Text>
+                                        <Text>{quotesRequest.request.receive}</Text>
                                     </Left>
                                     {!timer.isStopped && (
                                         <Right>

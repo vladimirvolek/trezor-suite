@@ -132,8 +132,8 @@ const ReceiveCryptoSelect = () => {
                 defaultValue={
                     quotesRequest
                         ? {
-                              label: quotesRequest.receive.toUpperCase(),
-                              value: quotesRequest.receive.toUpperCase(),
+                              label: quotesRequest.request.receive.toUpperCase(),
+                              value: quotesRequest.request.receive.toUpperCase(),
                           }
                         : false
                 }

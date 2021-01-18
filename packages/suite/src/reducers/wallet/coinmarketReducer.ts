@@ -59,7 +59,6 @@ interface QuoteRequestWithFeeLevel {
     isMax?: boolean;
     feeLabel: FeeLevel['label'];
     feePerUnit?: string;
-    
 }
 
 interface Exchange {
