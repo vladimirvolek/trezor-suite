@@ -138,10 +138,13 @@ describe('Coinmarket Exchange Actions', () => {
     it('saveQuoteRequest', () => {
         const store = initStore(getInitialState());
 
-        const request: ExchangeTradeQuoteRequest = {
-            receive: 'BTC',
-            send: 'LTC',
-            sendStringAmount: '12',
+        const request: coinmarketExchangeActions.QuoteRequestWithFeeLevel = {
+            request: {
+                receive: 'BTC',
+                send: 'LTC',
+                sendStringAmount: '12',
+            },
+            feeLabel: 'custom',
         };
 
         store.dispatch(coinmarketExchangeActions.saveQuoteRequest(request));
