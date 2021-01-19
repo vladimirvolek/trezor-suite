@@ -118,33 +118,38 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         }
     };
 
+    const getFeeLevel = (data: ComposeData) => {
+        const formValues = getValues();
+
+        const feeLevel = feeInfo.levels.find(level => level.label === data.feeLevelLabel);
+        const selectedFeeLevel =
+            feeLevel || feeInfo.levels.find(level => level.label === selectedFee);
+        if (!selectedFeeLevel) return undefined;
+
+        let { feePerUnit } = selectedFeeLevel;
+        if (selectedFeeLevel.label === 'custom') {
+            feePerUnit = data?.feePerUnit ? data.feePerUnit : formValues.feePerUnit || '0';
+        }
+        return { selectedFee, feePerUnit };
+    };
+
     const compose = async (data: ComposeData) => {
         let ok = false;
         setIsComposing(true);
         const formValues = getValues();
         const token =
             data && data.token ? data.token : formValues.sendCryptoSelect.value || undefined;
-        const feeLevel = feeInfo.levels.find(level => level.label === data.feeLevelLabel);
-        const selectedFeeLevel =
-            feeLevel || feeInfo.levels.find(level => level.label === selectedFee);
-        if (!selectedFeeLevel) return false;
-
         let placeholderAddress = storedPlaceholderAddress;
         if (!placeholderAddress) {
             placeholderAddress = await getComposeAddressPlaceholder();
             setStoredPlaceholderAddress(placeholderAddress);
         }
 
-        let { feePerUnit } = selectedFeeLevel;
-        if (selectedFeeLevel.label === 'custom') {
-            feePerUnit = data?.feePerUnit ? data.feePerUnit : formValues.feePerUnit || '0';
-        }
-
         const result: PrecomposedLevels | undefined = await composeTransaction({
             account,
             amount: data && data.amount ? data.amount : formValues.receiveCryptoInput || '0',
             feeInfo,
-            feePerUnit,
+            feePerUnit: getFeeLevel(data),
             feeLimit: data && data.feeLimit ? data.feeLimit : formValues.feeLimit || '0',
             network,
             selectedFee,
