@@ -34,12 +34,14 @@ const CustomFee = ({ isVisible }: Props) => {
         compose,
         isMax,
         selectedFee,
+        quotesRequest,
     } = useCoinmarketExchangeFormContext();
     const { maxFee, minFee } = feeInfo;
     const inputName = 'feePerUnit';
     const feePerUnitValue = '';
     const feePerUnitError = errors.feePerUnit;
     const selectedFeeLevel = feeInfo.levels.find(level => level.label === selectedFee);
+    const defaultValue = quotesRequest?.feePerUnit || selectedFeeLevel?.feePerUnit;
 
     return (
         <Wrapper isVisible={isVisible}>
@@ -48,7 +50,7 @@ const CustomFee = ({ isVisible }: Props) => {
                 variant="small"
                 monospace
                 width={120}
-                defaultValue={selectedFeeLevel?.feePerUnit}
+                defaultValue={defaultValue}
                 wrapperProps={{ width: '120' }}
                 state={getInputState(feePerUnitError, feePerUnitValue)}
                 innerAddon={<Units>{getFeeUnits(network.networkType)}</Units>}

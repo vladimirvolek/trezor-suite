@@ -53,7 +53,9 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
     const [transactionInfo, setTransactionInfo] = useState<null | PrecomposedTransactionFinal>(
         null,
     );
-    const [selectedFee, selectFee] = useState<FeeLevel['label']>('normal');
+    const [selectedFee, selectFee] = useState<FeeLevel['label']>(
+        quotesRequest?.feeLabel || 'normal',
+    );
     const [storedPlaceholderAddress, setStoredPlaceholderAddress] = useState<string | undefined>();
     const {
         saveQuoteRequest,
@@ -130,7 +132,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         if (selectedFeeLevel.label === 'custom') {
             feePerUnit = data?.feePerUnit ? data.feePerUnit : formValues.feePerUnit || '0';
         }
-        return { selectedFee, feePerUnit };
+        return { selectedFeeLevel, feePerUnit };
     };
 
     const compose = async (data: ComposeData) => {
@@ -144,12 +146,14 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
             placeholderAddress = await getComposeAddressPlaceholder();
             setStoredPlaceholderAddress(placeholderAddress);
         }
+        const feeLevel = getFeeLevel(data);
+        if (!feeLevel) return;
 
         const result: PrecomposedLevels | undefined = await composeTransaction({
             account,
             amount: data && data.amount ? data.amount : formValues.receiveCryptoInput || '0',
             feeInfo,
-            feePerUnit: getFeeLevel(data),
+            feePerUnit: feeLevel.feePerUnit,
             feeLimit: data && data.feeLimit ? data.feeLimit : formValues.feeLimit || '0',
             network,
             selectedFee,
@@ -163,7 +167,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         const tokenInfo = account.tokens?.find(t => t.symbol === formattedToken);
         const decimals = tokenInfo ? tokenInfo.decimals : network.decimals;
 
-        const transactionInfo = result ? result[selectedFeeLevel.label] : null;
+        const transactionInfo = result ? result[feeLevel.selectedFeeLevel.label] : null;
         if (transactionInfo?.type === 'final') {
             setTransactionInfo(transactionInfo);
             if (data.fillValue) {
@@ -232,7 +236,15 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
 
         const ok = await compose({ setMax: isMax });
         if (ok) {
-            saveQuoteRequest({ request, isMax, feeLevel });
+            const feeLevel = getFeeLevel({ setMax: isMax });
+            if (!feeLevel) return;
+
+            saveQuoteRequest({
+                request,
+                isMax,
+                feeLabel: feeLevel.selectedFeeLevel.label,
+                feePerUnit: feeLevel.feePerUnit,
+            });
             const allQuotes = await invityAPI.getExchangeQuotes(request);
             const limits = getAmountLimits(allQuotes);
 

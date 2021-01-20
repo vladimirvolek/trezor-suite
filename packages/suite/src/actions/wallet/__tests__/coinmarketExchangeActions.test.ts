@@ -4,7 +4,7 @@ import coinmarketReducer from '@wallet-reducers/coinmarketReducer';
 
 import * as coinmarketExchangeActions from '../coinmarketExchangeActions';
 import invityAPI from '@suite-services/invityAPI';
-import { ExchangeCoinInfo, ExchangeTrade, ExchangeTradeQuoteRequest } from 'invity-api';
+import { ExchangeCoinInfo, ExchangeTrade } from 'invity-api';
 
 export const getInitialState = () => ({
     wallet: {
