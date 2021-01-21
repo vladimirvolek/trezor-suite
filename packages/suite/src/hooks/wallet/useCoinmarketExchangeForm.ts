@@ -227,7 +227,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         const formValues = getValues();
         const sendStringAmount = formValues.sendCryptoInput || 'neulozilo se';
         const send = formValues.sendCryptoSelect.value;
-        const receive = formValues.sendCryptoSelect.value;
+        const receive = formValues.receiveCryptoSelect.value;
         const request: ExchangeTradeQuoteRequest = {
             receive,
             send,
