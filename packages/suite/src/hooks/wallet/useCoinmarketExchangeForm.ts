@@ -46,7 +46,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
     const localCurrencyOption = { value: localCurrency, label: localCurrency.toUpperCase() };
     const methods = useForm<FormState>({ mode: 'onChange' });
     const { register, setValue, getValues, setError, clearErrors } = methods;
-    const [token, setToken] = useState<string | undefined>(getValues('receiveCryptoSelect')?.value);
+    const [token, setToken] = useState<string | undefined>(getValues('sendCryptoSelect')?.value);
     const [amountLimits, setAmountLimits] = useState<AmountLimits | undefined>(undefined);
     const [isMax, setIsMax] = useState<boolean | undefined>(undefined);
     const [isComposing, setIsComposing] = useState<boolean>(false);
@@ -151,7 +151,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
 
         const result: PrecomposedLevels | undefined = await composeTransaction({
             account,
-            amount: data && data.amount ? data.amount : formValues.receiveCryptoInput || '0',
+            amount: data && data.amount ? data.amount : formValues.sendCryptoInput || '0',
             feeInfo,
             feePerUnit: feeLevel.feePerUnit,
             feeLimit: data && data.feeLimit ? data.feeLimit : formValues.feeLimit || '0',
@@ -177,16 +177,16 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
                         .decimalPlaces(decimals)
                         .toFixed();
                 }
-                setValue('receiveCryptoInput', amountToFill, { shouldValidate: true });
+                setValue('sendCryptoInput', amountToFill, { shouldValidate: true });
                 updateFiatValue(amountToFill);
             }
             saveComposedTransaction(transactionInfo);
-            clearErrors('receiveCryptoInput');
+            clearErrors('sendCryptoInput');
             ok = true;
         }
 
         if (transactionInfo?.type === 'error' && transactionInfo.errorMessage) {
-            setError('receiveCryptoInput', {
+            setError('sendCryptoInput', {
                 type: 'compose',
                 message: transactionInfo.errorMessage as any,
             });
@@ -197,7 +197,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
     };
 
     const updateFiatCurrency = (currency: { label: string; value: string }) => {
-        const amount = getValues('receiveCryptoInput') || '0';
+        const amount = getValues('sendCryptoInput') || '0';
         if (!fiatRates || !fiatRates.current || !currency) return;
         const fiatValue = toFiatCurrency(amount, currency.value, fiatRates.current.rates);
         if (fiatValue) {
@@ -205,7 +205,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         }
     };
 
-    const updateReceiveCryptoValue = (amount: string, decimals: number) => {
+    const updateSendCryptoValue = (amount: string, decimals: number) => {
         const currency: { value: string; label: string } | undefined = getValues('fiatSelect');
         if (!fiatRates || !fiatRates.current || !currency) return;
         const cryptoValue = fromFiatCurrency(
@@ -215,7 +215,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
             decimals,
         );
 
-        setValue('receiveCryptoInput', cryptoValue || '', { shouldValidate: true });
+        setValue('sendCryptoInput', cryptoValue || '', { shouldValidate: true });
     };
 
     const typedRegister = useCallback(<T>(rules?: T) => register(rules), [register]);
@@ -225,9 +225,9 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
 
     const onSubmit = async () => {
         const formValues = getValues();
-        const sendStringAmount = formValues.receiveCryptoInput || '';
+        const sendStringAmount = formValues.sendCryptoInput || 'neulozilo se';
         const send = formValues.sendCryptoSelect.value;
-        const receive = formValues.receiveCryptoSelect.value;
+        const receive = formValues.sendCryptoSelect.value;
         const request: ExchangeTradeQuoteRequest = {
             receive,
             send,
@@ -282,7 +282,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         updateFiatCurrency,
         selectFee,
         token,
-        updateReceiveCryptoValue,
+        updateSendCryptoValue,
         saveTrade,
         feeInfo,
         compose,

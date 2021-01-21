@@ -7,7 +7,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { isDecimalsValid, isInteger } from '@wallet-utils/validation';
 import { useCoinmarketExchangeFormContext } from '@wallet-hooks/useCoinmarketExchangeForm';
 import { Translation } from '@suite-components';
-import ReceiveCryptoSelect from './SendCryptoSelect';
+import SendCryptoSelect from './SendCryptoSelect';
 import { InputError } from '@wallet-components';
 import Bignumber from 'bignumber.js';
 import { MAX_LENGTH } from '@suite-constants/inputs';
@@ -45,7 +45,7 @@ const SendCryptoInput = () => {
         updateFiatValue,
         getValues,
     } = useCoinmarketExchangeFormContext();
-    const receiveCryptoInput = 'receiveCryptoInput';
+    const sendCryptoInput = 'sendCryptoInput';
     const fiatInput = 'fiatInput';
     const { symbol, tokens } = account;
     const tokenData = tokens?.find(t => t.symbol === invityApiSymbolToSymbol(token));
@@ -57,11 +57,11 @@ const SendCryptoInput = () => {
             ? formatNetworkAmount(account.misc.reserve, account.symbol)
             : undefined;
     const decimals = tokenData ? tokenData.decimals : network.decimals;
-    const amount = getValues(receiveCryptoInput);
+    const amount = getValues(sendCryptoInput);
     useDebounce(
         () => {
             // take value at debounce time, the user may type fast
-            const currentAmount = getValues(receiveCryptoInput);
+            const currentAmount = getValues(sendCryptoInput);
             if (currentAmount && !isMax) {
                 const amountBig = new Bignumber(currentAmount);
                 if (amountBig.gte(0)) {
@@ -83,8 +83,8 @@ const SendCryptoInput = () => {
                 clearErrors(fiatInput);
                 setMax(false);
             }}
-            state={errors[receiveCryptoInput] ? 'error' : undefined}
-            name={receiveCryptoInput}
+            state={errors[sendCryptoInput] ? 'error' : undefined}
+            name={sendCryptoInput}
             noTopLabel
             maxLength={MAX_LENGTH.AMOUNT}
             innerRef={register({
@@ -159,8 +159,8 @@ const SendCryptoInput = () => {
                     }
                 },
             })}
-            bottomText={<InputError error={errors[receiveCryptoInput]} />}
-            innerAddon={<ReceiveCryptoSelect />}
+            bottomText={<InputError error={errors[sendCryptoInput]} />}
+            innerAddon={<SendCryptoSelect />}
         />
     );
 };

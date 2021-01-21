@@ -62,7 +62,7 @@ const Inputs = () => {
     const formattedToken = invityApiSymbolToSymbol(token);
     const tokenData = account.tokens?.find(t => t.symbol === formattedToken);
     useEffect(() => {
-        trigger(['receiveCryptoInput']);
+        trigger(['sendCryptoInput']);
     }, [amountLimits, trigger]);
 
     return (
@@ -72,7 +72,7 @@ const Inputs = () => {
                     <SendCryptoInput />
                     <Line
                         color={
-                            errors.receiveCryptoInput || errors.fiatInput
+                            errors.sendCryptoInput || errors.fiatInput
                                 ? theme.TYPE_RED
                                 : theme.STROKE_GREY
                         }

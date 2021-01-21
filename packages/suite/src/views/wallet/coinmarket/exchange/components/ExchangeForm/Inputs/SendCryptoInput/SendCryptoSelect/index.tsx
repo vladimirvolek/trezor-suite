@@ -51,7 +51,7 @@ const SendCryptoSelect = () => {
                             setMax(false);
                             onChange(selected);
                             setAmountLimits(undefined);
-                            setValue('receiveCryptoInput', '');
+                            setValue('sendCryptoInput', '');
                             setValue('fiatInput', '');
                             const lowerCaseToken = selected.value.toLowerCase();
                             if (
