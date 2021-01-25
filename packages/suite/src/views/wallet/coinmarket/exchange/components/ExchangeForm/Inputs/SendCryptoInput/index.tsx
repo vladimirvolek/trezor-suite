@@ -44,6 +44,7 @@ const SendCryptoInput = () => {
         setMax,
         updateFiatValue,
         getValues,
+        quotesRequest,
     } = useCoinmarketExchangeFormContext();
     const sendCryptoInput = 'sendCryptoInput';
     const fiatInput = 'fiatInput';
@@ -83,6 +84,13 @@ const SendCryptoInput = () => {
                 clearErrors(fiatInput);
                 setMax(false);
             }}
+            defaultValue={
+                quotesRequest &&
+                quotesRequest.request.sendStringAmount.length > 0 &&
+                quotesRequest.request.sendStringAmount
+                    ? quotesRequest.request.sendStringAmount
+                    : ''
+            }
             state={errors[sendCryptoInput] ? 'error' : undefined}
             name={sendCryptoInput}
             noTopLabel
