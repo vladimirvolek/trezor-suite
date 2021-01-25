@@ -85,9 +85,7 @@ const SendCryptoInput = () => {
                 setMax(false);
             }}
             defaultValue={
-                quotesRequest &&
-                quotesRequest.request.sendStringAmount.length > 0 &&
-                quotesRequest.request.sendStringAmount
+                quotesRequest && quotesRequest.request.sendStringAmount
                     ? quotesRequest.request.sendStringAmount
                     : ''
             }
