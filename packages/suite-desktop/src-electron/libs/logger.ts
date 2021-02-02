@@ -15,12 +15,12 @@ export type Options = {
     logFormat?: string; // Output format of the log
 };
 
-const defaultOptions: Options = {
+export const defaultOptions: Options = {
     colors: true,
     writeToConsole: true,
     writeToDisk: false,
-    outputFile: 'log-%ts.txt',
-    outputPath: app?.getPath('logs') || process.cwd(),
+    outputFile: 'trezor-suite-log-%ts.txt',
+    outputPath: app?.getPath('home') ?? process.cwd(),
     logFormat: '%dt - %lvl(%top): %msg',
 };
 

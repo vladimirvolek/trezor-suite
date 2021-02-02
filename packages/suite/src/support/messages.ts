@@ -2715,6 +2715,10 @@ const definedMessages = defineMessages({
         id: 'TR_TO',
         defaultMessage: 'To',
     },
+    TR_GAS_LIMIT: {
+        id: 'TR_GAS_LIMIT',
+        defaultMessage: 'Gas limit',
+    },
     TR_SEND_GAS_LIMIT_TOOLTIP: {
         id: 'TR_SEND_GAS_LIMIT_TOOLTIP',
         defaultMessage:
@@ -2917,6 +2921,22 @@ const definedMessages = defineMessages({
         id: 'NOTIFICATIONS_EMPTY_DESC',
         defaultMessage:
             'Here you will see all important notifications once they happen. For now, there’s nothing to see.',
+    },
+    NOTIFICATIONS_SEEN_TITLE: {
+        id: 'NOTIFICATIONS_SEEN_TITLE',
+        defaultMessage: 'All read',
+    },
+    NOTIFICATIONS_ALL_TITLE: {
+        id: 'NOTIFICATIONS_ALL_TITLE',
+        defaultMessage: 'All activity',
+    },
+    NOTIFICATIONS_IMPORTANT_TITLE: {
+        id: 'NOTIFICATIONS_IMPORTANT_TITLE',
+        defaultMessage: 'Notifications',
+    },
+    NOTIFICATIONS_UNSEEN_TITLE: {
+        id: 'NOTIFICATIONS_UNSEEN_TITLE',
+        defaultMessage: '{count} Unread',
     },
     LABELING_ACCOUNT: {
         id: 'LABELING_ACCOUNT',
@@ -4576,6 +4596,14 @@ const definedMessages = defineMessages({
     CUSTOM_FEE_NOT_IN_RANGE: {
         defaultMessage: 'Allowed fee is between {minFee} and {maxFee}',
         id: 'CUSTOM_FEE_NOT_IN_RANGE',
+    },
+    CUSTOM_FEE_LIMIT_BELOW_RECOMMENDED: {
+        defaultMessage: 'Gas limit below recommended {feeLimit} {button}',
+        id: 'CUSTOM_FEE_LIMIT_BELOW_RECOMMENDED',
+    },
+    CUSTOM_FEE_LIMIT_USE_RECOMMENDED: {
+        defaultMessage: 'Use recommended',
+        id: 'CUSTOM_FEE_LIMIT_USE_RECOMMENDED',
     },
     TOKEN_BALANCE: {
         defaultMessage: 'Balance: {balance}',

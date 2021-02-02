@@ -9,7 +9,13 @@ import { Dispatch, GetState, AppState, TrezorDevice } from '@suite-types';
 import { getAnalyticsRandomId } from '@suite-utils/random';
 import { encodeDataToQueryString } from '@suite-utils/analytics';
 import { Account } from '@wallet-types';
-import { isDesktop, isWeb, setOnBeforeUnloadListener, getLocationHostname } from '@suite-utils/env';
+import {
+    isDesktop,
+    isWeb,
+    setOnBeforeUnloadListener,
+    getLocationHostname,
+    getOSVersion,
+} from '@suite-utils/env';
 import { setSentryUser } from '@suite-utils/sentry';
 import { State } from '@suite-reducers/analyticsReducer';
 
@@ -33,7 +39,7 @@ simple semver for data-analytics part.
 Don't forget to update docs with changelog!
 */
 
-const version = '1.5';
+const version = '1.6';
 
 export type AnalyticsEvent =
     | {
@@ -146,10 +152,17 @@ export type AnalyticsEvent =
               /** normal, segwit, legacy */
               type: Account['accountType'];
               /** index of account  */
-
               path: Account['path'];
               /** network (btc, eth, etc.) */
               symbol: Account['symbol'];
+              /** if tokens added */
+              tokensCount: number;
+          };
+      }
+    | {
+          type: 'accounts/empty-account/buy';
+          payload: {
+              symbol: string;
           };
       }
     | { type: 'dashboard/security-card/create-backup' }
@@ -282,6 +295,33 @@ export type AnalyticsEvent =
           payload: {
               type: 'hidden' | 'standard';
           };
+      }
+    | {
+          type: 'desktop-init';
+          payload: {
+              // added in 1.6
+              desktopOSVersion: string;
+          };
+      }
+    | {
+          type: 'transaction-created';
+          payload: {
+              action: 'sent' | 'copied' | 'downloaded';
+              symbol: Account['symbol'];
+              broadcast: boolean;
+              outputsCount: number;
+              bitcoinRbf: boolean;
+              bitcoinLockTime: boolean;
+              ethereumData: boolean;
+              tokenSent: boolean;
+          };
+      }
+    | {
+          type: 'add-token';
+          payload: {
+              networkSymbol: Account['symbol'];
+              addedNth: number; // if the user added 1st, 2nd,... token in his account
+          };
       };
 
 const getUrl = () => {
@@ -358,7 +398,7 @@ export const report = (data: AnalyticsEvent, force = false) => (
  * @param loadedState - analytics state loaded from storage
  * @param optout if true, analytics will be on by default (opt-out mode)
  */
-export const init = (loadedState: State, optout: boolean) => (
+export const init = (loadedState: State, optout: boolean) => async (
     dispatch: Dispatch,
     getState: GetState,
 ) => {
@@ -394,6 +434,22 @@ export const init = (loadedState: State, optout: boolean) => (
             }),
         );
     });
+
+    // send OS version if isDesktop
+    if (isDesktop()) {
+        let desktopOSVersion = '';
+        const resp = await getOSVersion();
+        if (resp?.success) {
+            desktopOSVersion = `${resp.payload.platform}_${resp.payload.release}`;
+        }
+
+        dispatch(
+            report({
+                type: 'desktop-init',
+                payload: { desktopOSVersion },
+            }),
+        );
+    }
 };
 
 export const enable = (): AnalyticsAction => ({

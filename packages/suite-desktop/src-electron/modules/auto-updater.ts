@@ -30,13 +30,19 @@ const init = ({ mainWindow, store }: Dependencies) => {
         mainWindow.webContents.send('update/skip', updateSettings.skipVersion);
     }
 
+    const setSkipVersion = (version: string) => {
+        updateSettings.skipVersion = version;
+        store.setUpdateSettings(updateSettings);
+    };
+
     autoUpdater.on('checking-for-update', () => {
         logger.info('auto-updater', 'Checking for update');
         mainWindow.webContents.send('update/checking');
     });
 
     autoUpdater.on('update-available', ({ version, releaseDate }) => {
-        if (updateSettings.skipVersion === version) {
+        const shouldSkip = updateSettings.skipVersion === version;
+        if (shouldSkip) {
             logger.warn('auto-updater', [
                 'Update is available but was skipped:',
                 `- Update version: ${version}`,
@@ -53,7 +59,7 @@ const init = ({ mainWindow, store }: Dependencies) => {
         ]);
 
         latestVersion = { version, releaseDate, isManualCheck };
-        mainWindow.webContents.send('update/available', latestVersion);
+        mainWindow.webContents.send(`update/${shouldSkip ? 'skip' : 'available'}`, latestVersion);
 
         // Reset manual check flag
         isManualCheck = false;
@@ -102,6 +108,7 @@ const init = ({ mainWindow, store }: Dependencies) => {
     ipcMain.on('update/check', (_, isManual?: boolean) => {
         if (isManual) {
             isManualCheck = true;
+            setSkipVersion('');
         }
 
         logger.info('auto-updater', `Update checking request (manual: ${b2t(isManualCheck)})`);
@@ -118,18 +125,18 @@ const init = ({ mainWindow, store }: Dependencies) => {
         updateCancellationToken = new CancellationToken();
         autoUpdater
             .downloadUpdate(updateCancellationToken)
-            .then(() => logger.info('auto-updater', 'Update cancelled'))
-            .catch(() => null); // Suppress error in console
+            .then(() => logger.info('auto-updater', 'Update downloaded'))
+            .catch(() => logger.info('auto-updater', 'Update cancelled'));
     });
     ipcMain.on('update/install', () => {
         logger.info('auto-updater', 'Installation request');
-        // This will force the closing of the window to quit the app on Mac
-        global.quitOnWindowClose = true;
-        // https://www.electron.build/auto-update#module_electron-updater.AppUpdater+quitAndInstall
-        // appUpdater.quitAndInstall(isSilent, isForceRunAfter)
-        // isSilent (windows): Runs the installer in silent mode
-        // isForceRunAfter (windows): Run the app after finish even on silent install
-        autoUpdater.quitAndInstall(true, true);
+
+        // Removing listeners & closing window (https://github.com/electron-userland/electron-builder/issues/1604)
+        app.removeAllListeners('window-all-closed');
+        mainWindow.removeAllListeners('close');
+        mainWindow.close();
+
+        autoUpdater.quitAndInstall();
     });
     ipcMain.on('update/cancel', () => {
         logger.info('auto-updater', 'Cancel update request');
@@ -139,8 +146,7 @@ const init = ({ mainWindow, store }: Dependencies) => {
     ipcMain.on('update/skip', (_, version) => {
         logger.info('auto-updater', `Skip version (${version}) request`);
         mainWindow.webContents.send('update/skip', version);
-        updateSettings.skipVersion = version;
-        store.setUpdateSettings(updateSettings);
+        setSkipVersion(version);
     });
 };
 

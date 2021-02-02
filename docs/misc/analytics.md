@@ -50,9 +50,27 @@ Breaking change should bump major version. Any other change bumps minor version.
 ### 1.6 (unreleased)
 Added: 
 - suite-ready
-  - suiteVersion: string | "" (empty string)
+  - suiteVersion: string | "" 
 - device-connect
   - isBitcoinOnly: boolean
+- desktop-init
+  - desktopOSVersion: string | "" (in format: {platform}_{release})
+- accounts/empty-account/buy
+  - symbol: string 
+- account-create
+  - tokensCount: number
+- transaction-created
+  - action: 'sent' | 'copied' | 'downloaded'
+  - symbol: string
+  - broadcast: boolean
+  - outputsCount: number
+  - bitcoinRbf: boolean
+  - bitcoinLockTime: boolean
+  - ethereumData: boolean
+  - tokenSent: boolean
+- add-token
+  - networkSymbol: string
+  - addedNth: number
   
 ### 1.5
 Added:

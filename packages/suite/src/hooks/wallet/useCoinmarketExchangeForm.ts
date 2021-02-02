@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import TrezorConnect, { FeeLevel } from 'trezor-connect';
+import TrezorConnect from 'trezor-connect';
 import { ExchangeTradeQuoteRequest } from 'invity-api';
 import BigNumber from 'bignumber.js';
 import { NETWORKS } from '@wallet-config';
@@ -9,7 +9,7 @@ import invityAPI from '@suite-services/invityAPI';
 import { invityApiSymbolToSymbol } from '@wallet-utils/coinmarket/coinmarketUtils';
 import { toFiatCurrency, fromFiatCurrency } from '@wallet-utils/fiatConverterUtils';
 import { getFeeLevels } from '@wallet-utils/sendFormUtils';
-import { PrecomposedLevels, PrecomposedTransactionFinal } from '@wallet-types/sendForm';
+import { PrecomposedTransactionFinal } from '@wallet-types/sendForm';
 import { useInvityAPI } from '@wallet-hooks/useCoinmarket';
 import * as coinmarketExchangeActions from '@wallet-actions/coinmarketExchangeActions';
 import * as coinmarketCommonActions from '@wallet-actions/coinmarket/coinmarketCommonActions';
@@ -22,6 +22,7 @@ import {
     ExchangeFormContextValues,
 } from '@wallet-types/coinmarketExchangeForm';
 import { getAmountLimits, splitToFixedFloatQuotes } from '@wallet-utils/coinmarket/exchangeUtils';
+import { useFees } from './form/useFees';
 
 export const ExchangeFormContext = createContext<ExchangeFormContextValues | null>(null);
 ExchangeFormContext.displayName = 'CoinmarketExchangeContext';
@@ -44,7 +45,11 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
     const feeInfo = { ...coinFees, levels };
     const fiatRates = fiat.coins.find(item => item.symbol === symbol);
     const localCurrencyOption = { value: localCurrency, label: localCurrency.toUpperCase() };
-    const methods = useForm<FormState>({ mode: 'onChange' });
+    const methods = useForm<FormState>({
+        mode: 'onChange',
+        shouldUnregister: false, // NOTE: tracking custom fee inputs
+        defaultValues: { selectedFee: 'normal', feePerUnit: '', feeLimit: '' },
+    });
     const { register, setValue, getValues, setError, clearErrors } = methods;
     const [token, setToken] = useState<string | undefined>(getValues('sendCryptoSelect')?.value);
     const [amountLimits, setAmountLimits] = useState<AmountLimits | undefined>(undefined);
@@ -53,9 +58,9 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
     const [transactionInfo, setTransactionInfo] = useState<null | PrecomposedTransactionFinal>(
         null,
     );
-    const [selectedFee, selectFee] = useState<FeeLevel['label']>(
-        quotesRequest?.feeLabel || 'normal',
-    );
+    // const [selectedFee, selectFee] = useState<FeeLevel['label']>(
+    //     quotesRequest?.feeLabel || 'normal',
+    // );
     const [storedPlaceholderAddress, setStoredPlaceholderAddress] = useState<string | undefined>();
     const {
         saveQuoteRequest,
@@ -125,15 +130,17 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
 
         const feeLevel = feeInfo.levels.find(level => level.label === data.feeLevelLabel);
         const selectedFeeLevel =
-            feeLevel || feeInfo.levels.find(level => level.label === selectedFee);
-        if (!selectedFeeLevel) return undefined;
+    //         feeLevel || feeInfo.levels.find(level => level.label === selectedFee);
+    //     if (!selectedFeeLevel) return undefined;
 
-        let { feePerUnit } = selectedFeeLevel;
-        if (selectedFeeLevel.label === 'custom') {
-            feePerUnit = data?.feePerUnit ? data.feePerUnit : formValues.feePerUnit || '0';
-        }
-        return { selectedFeeLevel, feePerUnit };
-    };
+    //     let { feePerUnit } = selectedFeeLevel;
+    //     if (selectedFeeLevel.label === 'custom') {
+    //         feePerUnit = data?.feePerUnit ? data.feePerUnit : formValues.feePerUnit || '0';
+    //     }
+    //     return { selectedFeeLevel, feePerUnit };
+    // };
+            feeLevel || feeInfo.levels.find(level => level.label === formValues.selectedFee);
+        if (!selectedFeeLevel) return false;
 
     const compose = async (data: ComposeData) => {
         let ok = false;
@@ -149,14 +156,14 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         const feeLevel = getFeeLevel(data);
         if (!feeLevel) return;
 
-        const result: PrecomposedLevels | undefined = await composeTransaction({
+        const result = await composeTransaction({
             account,
             amount: data && data.amount ? data.amount : formValues.sendCryptoInput || '0',
             feeInfo,
             feePerUnit: feeLevel.feePerUnit,
             feeLimit: data && data.feeLimit ? data.feeLimit : formValues.feeLimit || '0',
             network,
-            selectedFee,
+            selectedFee: formValues.selectedFee,
             isMaxActive: data && data.setMax ? data.setMax || false : false,
             address: placeholderAddress,
             token: token ? token.toLowerCase() : undefined,
@@ -182,6 +189,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
             }
             saveComposedTransaction(transactionInfo);
             clearErrors('sendCryptoInput');
+            setValue('estimatedFeeLimit', transactionInfo.estimatedFeeLimit);
             ok = true;
         }
 
@@ -262,6 +270,44 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         }
     };
 
+    // compose is not a callback. i don't want to rewrite the whole hook because of this
+    // there is a lot to improve with compose method, like debounce or work with all precomposed levels instead of one
+    // automatic switch to first possible FeeLevel (like send form)
+    const onFeeLevelChange = (_: any, current?: FormState['selectedFee']) => {
+        compose({
+            fillValue: isMax,
+            setMax: isMax,
+            feeLevelLabel: current,
+        });
+    };
+
+    const composeRequest = (field?: string) => {
+        const formValues = getValues();
+        if (field === 'feePerUnit') {
+            compose({
+                fillValue: isMax,
+                setMax: isMax,
+                feePerUnit: formValues.feePerUnit,
+            });
+        }
+        if (field === 'feeLimit') {
+            compose({
+                fillValue: isMax,
+                setMax: isMax,
+                feeLimit: formValues.feeLimit,
+            });
+        }
+    };
+
+    // sub-hook, FeeLevels handler
+    const { changeFeeLevel } = useFees({
+        defaultValue: 'normal',
+        feeInfo,
+        onChange: onFeeLevelChange,
+        composeRequest,
+        ...methods,
+    });
+
     return {
         ...methods,
         account,
@@ -270,6 +316,7 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         register: typedRegister,
         exchangeInfo,
         isMax: isMax || false,
+        changeFeeLevel,
         setToken,
         saveQuoteRequest,
         setMax: setIsMax,
@@ -278,15 +325,12 @@ export const useCoinmarketExchangeForm = (props: Props): ExchangeFormContextValu
         transactionInfo,
         localCurrencyOption,
         exchangeCoinInfo,
-        selectedFee,
         updateFiatCurrency,
-        selectFee,
         token,
         updateSendCryptoValue,
         saveTrade,
         feeInfo,
         compose,
-        setTransactionInfo,
         fiatRates,
         isComposing,
         amountLimits,

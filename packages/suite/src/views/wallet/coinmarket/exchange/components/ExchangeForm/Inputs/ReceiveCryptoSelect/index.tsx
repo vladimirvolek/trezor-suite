@@ -165,6 +165,7 @@ const ReceiveCryptoSelect = () => {
                                 );
                             }}
                             placeholder={<Translation id="TR_TRADE_SELECT_COIN" />}
+                            isSearchable
                         />
                     );
                 }}
