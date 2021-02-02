@@ -8,6 +8,9 @@ import { Translation } from '@suite-components';
 import FiatSelect from './FiatSelect';
 import BigNumber from 'bignumber.js';
 import { MAX_LENGTH } from '@suite-constants/inputs';
+import { toFiatCurrency } from '@wallet-utils/fiatConverterUtils';
+import { useForm } from 'react-hook-form';
+import { FormState } from '@wallet-types/coinmarketExchangeForm';
 
 const StyledInput = styled(Input)`
     border-left: 0;
@@ -25,9 +28,17 @@ const FiatInput = () => {
         updateSendCryptoValue,
         setMax,
         setValue,
+        quotesRequest,
+        fiatRates,
     } = useCoinmarketExchangeFormContext();
     const fiatInput = 'fiatInput';
 
+    const methods = useForm<FormState>({ mode: 'all' });
+    const { getValues } = methods;
+    console.log({ getValues });
+    const currency = getValues('fiatSelect');
+
+    console.log(`currency: ${currency?.value}`);
     return (
         <StyledInput
             onFocus={() => {
@@ -42,6 +53,20 @@ const FiatInput = () => {
                     clearErrors(fiatInput);
                 }
             }}
+            defaultValue={
+                quotesRequest && quotesRequest.request.sendStringAmount && currency?.value
+                    ? toFiatCurrency(
+                          quotesRequest.request.sendStringAmount,
+                          currency.value,
+                          fiatRates?.current?.rates,
+                      ) || ''
+                    : 'nic nic'
+            }
+            // defaultValue={
+            //     quotesRequest && quotesRequest.request.sendStringAmount
+            //         ? quotesRequest.request.sendStringAmount
+            //         : ''
+            // }
             state={errors[fiatInput] ? 'error' : undefined}
             name={fiatInput}
             noTopLabel
