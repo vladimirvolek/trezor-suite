@@ -33,10 +33,6 @@ const ReceiveCryptoSelect = () => {
         <Controller
             control={control}
             name={receiveCryptoSelect}
-            // defaultValue={{
-            //     value: uppercaseSymbol,
-            //     label: formatLabel(uppercaseSymbol),
-            // }}
             defaultValue={
                 quotesRequest
                     ? {
