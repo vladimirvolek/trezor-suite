@@ -24,6 +24,7 @@ const ReceiveCryptoSelect = () => {
         exchangeInfo,
         setToken,
         compose,
+        quotesRequest,
     } = useCoinmarketExchangeFormContext();
     const receiveCryptoSelect = 'receiveCryptoSelect';
     const uppercaseSymbol = account.symbol.toUpperCase();
@@ -32,10 +33,21 @@ const ReceiveCryptoSelect = () => {
         <Controller
             control={control}
             name={receiveCryptoSelect}
-            defaultValue={{
-                value: uppercaseSymbol,
-                label: formatLabel(uppercaseSymbol),
-            }}
+            // defaultValue={{
+            //     value: uppercaseSymbol,
+            //     label: formatLabel(uppercaseSymbol),
+            // }}
+            defaultValue={
+                quotesRequest
+                    ? {
+                          label: quotesRequest.send.toUpperCase(),
+                          value: quotesRequest.send.toUpperCase(),
+                      }
+                    : {
+                          label: formatLabel(uppercaseSymbol),
+                          value: uppercaseSymbol,
+                      }
+            }
             render={({ onChange, value }) => {
                 return (
                     <Select

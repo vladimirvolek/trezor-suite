@@ -109,6 +109,7 @@ const SendCryptoSelect = () => {
         exchangeInfo,
         exchangeCoinInfo,
         account,
+        quotesRequest,
     } = useCoinmarketExchangeFormContext();
 
     const customSearch = (
@@ -128,7 +129,14 @@ const SendCryptoSelect = () => {
         <Wrapper>
             <Controller
                 control={control}
-                defaultValue={false}
+                defaultValue={
+                    quotesRequest
+                        ? {
+                              label: quotesRequest.receive.toUpperCase(),
+                              value: quotesRequest.receive.toUpperCase(),
+                          }
+                        : false
+                }
                 name="sendCryptoSelect"
                 render={({ onChange, value }) => {
                     return (
