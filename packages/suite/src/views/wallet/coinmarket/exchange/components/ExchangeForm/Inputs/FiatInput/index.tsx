@@ -9,8 +9,6 @@ import FiatSelect from './FiatSelect';
 import BigNumber from 'bignumber.js';
 import { MAX_LENGTH } from '@suite-constants/inputs';
 import { toFiatCurrency } from '@wallet-utils/fiatConverterUtils';
-import { useForm } from 'react-hook-form';
-import { FormState } from '@wallet-types/coinmarketExchangeForm';
 
 const StyledInput = styled(Input)`
     border-left: 0;
@@ -30,14 +28,16 @@ const FiatInput = () => {
         setValue,
         quotesRequest,
         fiatRates,
+        getValues,
     } = useCoinmarketExchangeFormContext();
-    const fiatInput = 'fiatInput';
 
-    const methods = useForm<FormState>({ mode: 'onChange' });
-    const { getValues } = methods;
+    const fiatInput = 'fiatInput';
     const currency = getValues('fiatSelect');
 
-    console.log(`currency: ${currency}`);
+    // console.log(`currency `, currency);
+    // console.log(`send string mount `, quotesRequest?.sendStringAmount);
+    console.log(`fiatRates current rates `, fiatRates?.current?.rates);
+    // console.log('quotes request send', quotesRequest?.send);
 
     return (
         <StyledInput
