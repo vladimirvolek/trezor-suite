@@ -430,4 +430,12 @@ export default [
             subscribe: '',
         },
     },
+    {
+        blockchain: {
+            name: 'Cardano',
+            worker: 'js/cardano-worker.js',
+            server: ['ws://localhost:3000'],
+            debug: true,
+        },
+    },
 ];

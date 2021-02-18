@@ -44,7 +44,7 @@ const connect = async (): Promise<Connection> => {
         endpoints = common.shuffleEndpoints(server.slice(0));
     }
 
-    common.debug('Connecting to', endpoints[0]);
+    common.debug('Connecting to blockbook', endpoints[0]);
     const connection = new Connection({
         url: endpoints[0],
         timeout,

@@ -1,6 +1,8 @@
 // @ts-ignore no default export
 import BlockbookWorker from '../workers/blockbook/index';
 // @ts-ignore no default export
+import CardanoWorker from '../workers/cardano/index';
+// @ts-ignore no default export
 import RippleWorker from '../workers/ripple/index';
 
 import CONFIG from './config';
@@ -26,17 +28,11 @@ const handleClick = (event: MouseEvent) => {
 
     switch (target.id) {
         case 'disconnect':
-            blockchain
-                .disconnect()
-                .then(onResponse)
-                .catch(onError);
+            blockchain.disconnect().then(onResponse).catch(onError);
             break;
 
         case 'get-info':
-            blockchain
-                .getInfo()
-                .then(onResponse)
-                .catch(onError);
+            blockchain.getInfo().then(onResponse).catch(onError);
             break;
 
         case 'get-account-info': {
@@ -47,10 +43,7 @@ const handleClick = (event: MouseEvent) => {
                     details: getInputValue('get-account-info-mode') || 'basic',
                     ...options,
                 };
-                blockchain
-                    .getAccountInfo(payload)
-                    .then(onResponse)
-                    .catch(onError);
+                blockchain.getAccountInfo(payload).then(onResponse).catch(onError);
             } catch (error) {
                 onError(error);
             }
@@ -83,10 +76,7 @@ const handleClick = (event: MouseEvent) => {
 
         case 'estimate-fee': {
             const options: any = JSON.parse(getInputValue('estimate-fee-options'));
-            blockchain
-                .estimateFee(options)
-                .then(onResponse)
-                .catch(onError);
+            blockchain.estimateFee(options).then(onResponse).catch(onError);
             break;
         }
         case 'push-transaction':
@@ -344,7 +334,7 @@ const init = (instances: any[]) => {
 init(CONFIG);
 
 CONFIG.forEach(i => {
-    const worker: any = i.blockchain.worker.indexOf('ripple') >= 0 ? RippleWorker : BlockbookWorker;
+    const worker: any = CardanoWorker;
     const b = new BlockchainLink({
         ...i.blockchain,
         worker,

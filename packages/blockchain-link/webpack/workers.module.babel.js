@@ -18,7 +18,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: [/blockbook\/index.ts?$/, /ripple\/index.ts?$/],
+                test: [/blockbook\/index.ts?$/, /ripple\/index.ts?$/, /cardano\/index.ts$/],
                 exclude: /node_modules/,
                 use: ['module-worker-loader'],
             },

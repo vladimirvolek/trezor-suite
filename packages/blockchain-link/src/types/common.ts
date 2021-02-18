@@ -43,6 +43,10 @@ export type TypedRawTransaction =
     | {
           type: 'ripple';
           tx: RippleTransaction;
+      }
+    | {
+          type: 'cardano';
+          tx: any;
       };
 
 export type TransactionDetail = {

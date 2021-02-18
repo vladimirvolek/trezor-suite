@@ -42,7 +42,7 @@ class WorkerCommon {
         return this.settings;
     }
 
-    errorHandler({ id, error }: { id: number; error: any }) {
+    errorHandler({ id, error }: { id: number | string; error: any }) {
         let errorCode = 'blockchain_link/unknown';
         // let message: string = '';
         // this part is uncovered by tests but for some reason i've write it like this (ripple maybe)
