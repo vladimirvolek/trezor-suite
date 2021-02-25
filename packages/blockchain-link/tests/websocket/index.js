@@ -3,10 +3,12 @@ import * as assert from 'assert';
 import getFreePort from './freePort';
 import defaultBlockbookResponses from './fixtures/blockbook';
 import defaultRippleResponses from './fixtures/ripple';
+import defaultCardanoResponses from './fixtures/cardano';
 
 const RESPONSES = {
     blockbook: defaultBlockbookResponses,
     ripple: defaultRippleResponses,
+    cardano: defaultCardanoResponses,
 };
 
 const create = async type => {

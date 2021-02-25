@@ -49,6 +49,14 @@ const blockbookWorkerFactory = () => {
     return new MyWorker();
 };
 
+const cardanoWorkerFactory = () => {
+    require('../../../src/workers/cardano/index.ts'); // eslint-disable-line global-require
+    setTimeout(() => {
+        global.postMessage({ id: -1, type: 'm_handshake' });
+    }, 1);
+    return new MyWorker();
+};
+
 export default [
     {
         name: 'ripple',
@@ -57,5 +65,9 @@ export default [
     {
         name: 'blockbook',
         worker: blockbookWorkerFactory,
+    },
+    {
+        name: 'cardano',
+        worker: cardanoWorkerFactory,
     },
 ];
