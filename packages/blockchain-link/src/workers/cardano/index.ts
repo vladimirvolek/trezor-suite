@@ -18,7 +18,7 @@ const getApi = (): BlockFrostAPI => {
         return blockFrostApi;
     }
 
-    blockFrostApi = new BlockFrostAPI({ projectId: 'jOhDckOVcwx1UrlUCl9iAcHWem2pzZgI' });
+    blockFrostApi = new BlockFrostAPI({ projectId: 'G8CaeClBRTr5CiUxCLzgGeqGoVbwuaZs' });
     return blockFrostApi;
 };
 
@@ -49,10 +49,11 @@ const getInfo = async (data: { id: number } & MessageTypes.GetInfo): Promise<voi
 };
 
 const getTransaction = async (data: { id: any } & MessageTypes.GetTransaction): Promise<void> => {
+    const { payload } = data;
+
     try {
         const blockFrostApi = getApi();
-        const tx = await blockFrostApi.txs(data.id);
-
+        const tx = await blockFrostApi.txs(payload);
         common.response({
             id: data.id,
             type: RESPONSES.GET_TRANSACTION,
