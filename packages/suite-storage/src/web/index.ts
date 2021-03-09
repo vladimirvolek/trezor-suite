@@ -13,8 +13,6 @@ import {
 import { BroadcastChannel } from 'broadcast-channel';
 import { StorageUpdateMessage, StorageMessageEvent } from './types';
 
-// const VERSION = 1;
-
 export type OnUpgradeFunc<TDBStructure> = (
     db: IDBPDatabase<TDBStructure>,
     oldVersion: number,
@@ -28,14 +26,21 @@ class CommonDB<TDBStructure> {
     version!: number;
     db!: IDBPDatabase<TDBStructure> | null;
     broadcastChannel!: BroadcastChannel;
+    supported: boolean | undefined;
+    blocking = false;
+    blocked = false;
     onUpgrade!: OnUpgradeFunc<TDBStructure>;
     onDowngrade!: () => any;
+    onBlocked?: () => void;
+    onBlocking?: () => void;
 
     constructor(
         dbName: string,
         version: number,
         onUpgrade: OnUpgradeFunc<TDBStructure>,
-        onDowngrade: () => any
+        onDowngrade: () => any,
+        onBlocked?: () => void,
+        onBlocking?: () => void
     ) {
         if (CommonDB.instance) {
             return CommonDB.instance;
@@ -43,16 +48,24 @@ class CommonDB<TDBStructure> {
 
         this.dbName = dbName;
         this.version = version;
+        this.supported = undefined;
         this.onUpgrade = onUpgrade.bind(this);
         this.onDowngrade = onDowngrade.bind(this);
+        this.onBlocked = onBlocked;
+        this.onBlocking = onBlocking;
         this.db = null;
+        this.blocking = false;
+        this.blocked = false;
+
+        this.isSupported();
+
         // create global instance of broadcast channel
         this.broadcastChannel = new BroadcastChannel('storageChangeEvent');
 
         CommonDB.instance = this;
     }
 
-    static isDBAvailable = () => {
+    static isDBAvailable = (): Promise<boolean> => {
         // Firefox doesn't support indexedDB while in incognito mode, but still returns valid window.indexedDB object.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=781982
         // so we need to try accessing the IDB. try/catch around idb.open() does not catch the error (bug in idb?), that's why we use callbacks.
@@ -76,6 +89,17 @@ class CommonDB<TDBStructure> {
         });
     };
 
+    isSupported = async () => {
+        if (this.supported === undefined) {
+            const isAvailable = await CommonDB.isDBAvailable();
+            this.supported = isAvailable;
+            if (!isAvailable) {
+                console.warn("Couldn't get an access to IndexedDB.");
+            }
+        }
+        return this.supported;
+    };
+
     notify = (store: StoreNames<TDBStructure>, keys: any[]) => {
         // sends the message containing store, keys which were updated to other tabs/windows
         const message = { store, keys };
@@ -85,6 +109,12 @@ class CommonDB<TDBStructure> {
     onChange = (handler: (event: StorageMessageEvent<TDBStructure>) => any) => {
         // listens to the channel. On receiving a message triggers the handler func
         this.broadcastChannel.onmessage = handler;
+    };
+
+    closeAfterTimeout = (timeout = 1000) => {
+        setTimeout(() => {
+            this.db?.close();
+        }, timeout);
     };
 
     getDB = async () => {
@@ -97,22 +127,32 @@ class CommonDB<TDBStructure> {
                         this.onUpgrade(db, oldVersion, newVersion, transaction);
                     },
                     blocked: () => {
+                        this.blocked = true;
                         // Called if there are older versions of the database open on the origin, so this version cannot open.
-                        // TODO
-                        console.log(
-                            'Accessing the IDB is blocked by another window running older version.'
-                        );
+                        if (this.onBlocked) {
+                            this.onBlocked();
+                        }
+                        // wait 1 sec before closing the db to let app enough time to finish all requests
+                        this.closeAfterTimeout();
                     },
                     blocking: () => {
                         // Called if this connection is blocking a future version of the database from opening.
-                        // TODO
-                        console.log('This instance is blocking the IDB upgrade to new version.');
+                        this.blocking = true;
+                        if (this.onBlocking) {
+                            this.onBlocking();
+                        }
+                        // wait 1 sec before closing the db to let app enough time to finish all requests
+                        this.closeAfterTimeout();
+                    },
+                    terminated: () => {
+                        // browser killed idb, user cleared history
+                        console.warn('Unexpected IDB close');
                     },
                 });
             } catch (error) {
                 if (error && error.name === 'VersionError') {
                     indexedDB.deleteDatabase(this.dbName);
-                    console.log(
+                    console.warn(
                         'IndexedDB was deleted because your version is higher than it should be (downgrade)'
                     );
                     this.onDowngrade();

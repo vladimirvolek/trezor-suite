@@ -1,11 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FormattedDate } from 'react-intl';
-import { Icon, useTheme, variables, Loader, CoinLogo, Tooltip } from '@trezor/components';
-import { Translation, HiddenPlaceholder, TrezorLink } from '@suite-components';
+import { Icon, useTheme, variables, CoinLogo, Tooltip } from '@trezor/components';
+import {
+    Translation,
+    HiddenPlaceholder,
+    TrezorLink,
+    FormattedDateWithBullet,
+} from '@suite-components';
 import { getDateWithTimeZone } from '@suite-utils/date';
 import { WalletAccountTransaction, Network } from '@wallet-types';
-import { getFeeRate, getBlockExplorerUrl, isTxFinal } from '@wallet-utils/transactionUtils';
+import {
+    getFeeRate,
+    getBlockExplorerUrl,
+    isTxFinal,
+    getTxIcon,
+} from '@wallet-utils/transactionUtils';
 import { getFeeUnits } from '@wallet-utils/sendFormUtils';
 
 const Wrapper = styled.div`
@@ -31,16 +40,6 @@ const StatusWrapper = styled.div`
     display: flex;
     height: 20px;
     align-items: center;
-`;
-
-const HourWrapper = styled.div`
-    display: inline-flex;
-    color: ${props => props.theme.TYPE_LIGHT_GREY};
-`;
-
-const LoaderIconWrapper = styled.div`
-    align-self: left;
-    margin-right: 10px;
 `;
 
 const HeaderFirstRow = styled.div`
@@ -153,17 +152,15 @@ const Circle = styled.div`
     color: ${props => props.theme.TYPE_LIGHT_GREY};
 `;
 
-const Bullet = styled.span`
-    margin-left: 0.5ch;
-    margin-right: 0.5ch;
-    color: ${props => props.theme.TYPE_LIGHT_GREY};
-`;
-
 const Timestamp = styled.span`
     white-space: nowrap;
 `;
 
 const StyledIcon = styled(Icon)`
+    margin-right: 6px;
+`;
+const IconPlaceholder = styled.span`
+    min-width: 10px;
     margin-right: 6px;
 `;
 const LinkIcon = styled(Icon)`
@@ -173,7 +170,6 @@ const LinkIcon = styled(Icon)`
 interface Props {
     tx: WalletAccountTransaction;
     network: Network;
-    isFetching: boolean;
     confirmations: number;
 }
 
@@ -192,7 +188,7 @@ const getHumanReadableTxType = (tx: WalletAccountTransaction) => {
     }
 };
 
-const BasicDetails = ({ tx, confirmations, network, isFetching }: Props) => {
+const BasicDetails = ({ tx, confirmations, network }: Props) => {
     const theme = useTheme();
     const isConfirmed = confirmations > 0;
     const transactionStatus = getHumanReadableTxType(tx);
@@ -209,33 +205,30 @@ const BasicDetails = ({ tx, confirmations, network, isFetching }: Props) => {
                     <NestedIconWrapper>
                         <Icon
                             size={14}
-                            color={theme.TYPE_DARK_GREY}
-                            icon={tx.type === 'recv' ? 'RECEIVE' : 'SEND'}
+                            color={tx.type === 'failed' ? theme.TYPE_RED : theme.TYPE_DARK_GREY}
+                            icon={getTxIcon(tx.type)}
                         />
                     </NestedIconWrapper>
                 </MainIconWrapper>
                 <TxStatus>
                     <TxSentStatus>
-                        {transactionStatus} {assetSymbol}
+                        {tx.type === 'failed' ? (
+                            <Translation id="TR_FAILED_TRANSACTION" />
+                        ) : (
+                            <>
+                                {transactionStatus} {assetSymbol}
+                            </>
+                        )}
                     </TxSentStatus>
                 </TxStatus>
 
                 <ConfirmationStatusWrapper>
                     {isConfirmed ? (
                         <StatusWrapper>
-                            {/* show spinner if data is being fetched */}
-                            {isFetching ? (
-                                <LoaderIconWrapper>
-                                    <Loader size={16} />
-                                </LoaderIconWrapper>
-                            ) : (
-                                <>
-                                    <ConfirmationStatus confirmed>
-                                        <Translation id="TR_CONFIRMED_TX" />
-                                    </ConfirmationStatus>
-                                    <Circle>&bull;</Circle>
-                                </>
-                            )}
+                            <ConfirmationStatus confirmed>
+                                <Translation id="TR_CONFIRMED_TX" />
+                            </ConfirmationStatus>
+                            <Circle>&bull;</Circle>
 
                             {confirmations && (
                                 <Confirmations>
@@ -267,21 +260,10 @@ const BasicDetails = ({ tx, confirmations, network, isFetching }: Props) => {
                 <Value>
                     {tx.blockTime ? (
                         <Timestamp>
-                            <FormattedDate
+                            <FormattedDateWithBullet
                                 value={getDateWithTimeZone(tx.blockTime * 1000)}
-                                year="numeric"
-                                month="short"
-                                day="2-digit"
+                                timeLightColor
                             />
-
-                            <Bullet>&bull;</Bullet>
-                            <HourWrapper>
-                                <FormattedDate
-                                    value={getDateWithTimeZone(tx.blockTime * 1000)}
-                                    hour="2-digit"
-                                    minute="2-digit"
-                                />
-                            </HourWrapper>
                         </Timestamp>
                     ) : (
                         <Translation id="TR_UNKNOWN_CONFIRMATION_TIME" />
@@ -323,6 +305,40 @@ const BasicDetails = ({ tx, confirmations, network, isFetching }: Props) => {
                                 />
                             </ConfirmationStatus>
                         </Value>
+                    </>
+                )}
+
+                {/* Ethereum */}
+                {tx.ethereumSpecific && (
+                    <>
+                        <Title>
+                            <StyledIcon icon="GAS" size={10} />
+                            <Translation id="TR_GAS_LIMIT" />
+                        </Title>
+                        <Value>{tx.ethereumSpecific.gasLimit}</Value>
+                        <Title>
+                            <StyledIcon icon="GAS" size={10} />
+                            <Translation id="TR_GAS_USED" />
+                        </Title>
+                        <Value>
+                            {tx.ethereumSpecific.gasUsed ? (
+                                tx.ethereumSpecific.gasUsed
+                            ) : (
+                                <Translation id="TR_BUY_STATUS_PENDING" />
+                            )}
+                        </Value>
+                        <Title>
+                            <StyledIcon icon="GAS" size={10} />
+                            <Translation id="TR_GAS_PRICE" />
+                        </Title>
+                        <Value>{`${tx.ethereumSpecific.gasPrice} ${getFeeUnits(
+                            'ethereum',
+                        )}`}</Value>
+                        <Title>
+                            <IconPlaceholder>#</IconPlaceholder>
+                            <Translation id="TR_NONCE" />
+                        </Title>
+                        <Value>{tx.ethereumSpecific.nonce}</Value>
                     </>
                 )}
             </Grid>

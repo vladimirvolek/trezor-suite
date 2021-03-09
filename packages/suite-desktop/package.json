@@ -1,7 +1,7 @@
 {
     "name": "@trezor/suite-desktop",
     "description": "Trezor Suite desktop application",
-    "version": "21.3.0",
+    "version": "21.4.0",
     "private": true,
     "author": "SatoshiLabs <info@satoshilabs.com>",
     "homepage": "https://trezor.io/",
@@ -38,7 +38,7 @@
         "productName": "Trezor Suite",
         "copyright": "Copyright © ${author}",
         "asar": true,
-        "electronVersion": "11.1.1",
+        "electronVersion": "11.2.1",
         "directories": {
             "output": "build-electron"
         },
@@ -151,7 +151,7 @@
         "electron-store": "^5.1.1",
         "electron-updater": "^4.3.5",
         "node-fetch": "^2.6.1",
-        "systeminformation": "^4.34.7"
+        "systeminformation": "^5.4.0"
     },
     "devDependencies": {
         "@sentry/browser": "^5.29.2",
@@ -159,13 +159,13 @@
         "@types/electron-localshortcut": "^3.1.0",
         "@types/next-redux-wrapper": "^3.0.0",
         "@types/node-fetch": "^2.5.7",
-        "@types/react": "^17.0.0",        
+        "@types/react": "^17.0.0",
         "@types/react-dom": "^17.0.0",
         "@types/react-redux": "^7.1.7",
         "@zeit/next-workers": "^1.0.0",
         "babel-plugin-styled-components": "1.12.0",
         "cross-env": "^7.0.3",
-        "electron": "^11.1.1",
+        "electron": "^11.2.1",
         "electron-builder": "^22.7.0",
         "electron-notarize": "^1.0.0",
         "esbuild": "^0.8.12",

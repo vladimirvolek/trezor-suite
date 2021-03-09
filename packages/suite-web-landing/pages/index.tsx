@@ -7,6 +7,8 @@ import Download from '@suite-web-landing-components/Download';
 import Feature from '@suite-web-landing-components/Feature';
 import { resolveStaticPath } from '@suite-utils/nextjs';
 import { H1, P, variables, colors } from '@trezor/components';
+import Metadata from '@suite-components/Metadata';
+import { URLS } from '@suite-constants';
 import { Fade } from 'react-awesome-reveal';
 import enLocale from '@trezor/suite-data/files/translations/en.json';
 
@@ -135,6 +137,11 @@ const Index = () => {
     return (
         <TranslationModeContext.Provider value={translationMode}>
             <IntlProvider locale="en" messages={enLocale}>
+                <Metadata
+                    image={`${URLS.SUITE_URL}${resolveStaticPath(
+                        'images/suite-web-landing/meta.png',
+                    )}`}
+                />
                 <Layout>
                     <Wrapper>
                         <StyledHeroCta>

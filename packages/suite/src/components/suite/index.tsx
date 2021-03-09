@@ -15,7 +15,7 @@ import WordInput from './WordInput';
 import WordInputAdvanced from './WordInputAdvanced';
 import ProgressBar from './ProgressBar';
 import Loading from './Loading';
-import FiatValue from './FiatValue/Container';
+import FiatValue from './FiatValue';
 import WebusbButton from './WebusbButton';
 import { HiddenPlaceholder } from './HiddenPlaceholder';
 import QrCode from './QrCode';
@@ -37,6 +37,8 @@ import BetaBadge from './BetaBadge';
 import { Modal, ModalProps } from './Modal';
 import { SkeletonRectangle, SkeletonCircle } from './Skeleton';
 import Notifications from './Notifications';
+import FormattedDate, { FormattedDateWithBullet } from './FormattedDate';
+import Metadata from './Metadata';
 
 export {
     Backdrop,
@@ -83,5 +85,8 @@ export {
     SkeletonRectangle,
     SkeletonCircle,
     Notifications,
+    FormattedDate,
+    FormattedDateWithBullet,
+    Metadata,
 };
 export type { ImageProps, ModalProps };

@@ -1,6 +1,6 @@
 {
     "name": "trezor-suite",
-    "version": "21.3.0",
+    "version": "21.4.0",
     "private": true,
     "repository": "https://github.com/trezor/trezor-suite.git",
     "license": "SEE LICENSE IN LICENSE.md",
@@ -29,7 +29,8 @@
         "suite:dev:desktop": "yarn workspace @trezor/suite-desktop dev",
         "suite:build:web": "yarn workspace @trezor/suite-web build",
         "type-check": "yarn lerna run type-check",
-        "lint": "yarn lerna run lint"
+        "lint": "yarn lerna run lint",
+        "release": "release-it"
     },
     "resolutions": {
         "**/@types/react": "17.0.0"
@@ -67,8 +68,12 @@
         "postinstall-postinstall": "^2.0.0",
         "prettier": "2.2.0",
         "prettier-eslint": "^12.0.0",
+        "release-it": "^14.4.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^26.4.4",
         "typescript": "^4.1.3"
+    },
+    "dependencies": {
+        "@release-it/bumper": "release-it/bumper"
     }
 }

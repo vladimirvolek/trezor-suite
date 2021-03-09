@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { AccountTransaction, AccountAddress } from 'trezor-connect';
+import { fromWei } from 'web3-utils';
 import { Account, WalletAccountTransaction, RbfTransactionParams } from '@wallet-types';
 import { AccountMetadata } from '@suite-types/metadata';
 import { getDateWithTimeZone } from '../suite/date';
@@ -59,9 +60,8 @@ export const groupTransactionsByDate = (
 export const sumTransactions = (transactions: WalletAccountTransaction[]) => {
     let totalAmount = new BigNumber(0);
     transactions.forEach(tx => {
-        // count only recv/sent txs
-        if (tx.type === 'sent') {
-            totalAmount = totalAmount.minus(tx.amount).minus(tx.fee);
+        if (tx.type === 'sent' || tx.type === 'self') {
+            totalAmount = totalAmount.minus(tx.amount);
         }
         if (tx.type === 'recv') {
             totalAmount = totalAmount.plus(tx.amount);
@@ -76,11 +76,10 @@ export const sumTransactionsFiat = (
 ) => {
     let totalAmount = new BigNumber(0);
     transactions.forEach(tx => {
-        // count only recv/sent txs
-        if (tx.type === 'sent') {
-            totalAmount = totalAmount
-                .minus(toFiatCurrency(tx.amount, fiatCurrency, tx.rates, -1) ?? 0)
-                .minus(toFiatCurrency(tx.fee, fiatCurrency, tx.rates, -1) ?? 0);
+        if (tx.type === 'sent' || tx.type === 'self') {
+            totalAmount = totalAmount.minus(
+                toFiatCurrency(tx.amount, fiatCurrency, tx.rates, -1) ?? 0,
+            );
         }
         if (tx.type === 'recv') {
             totalAmount = totalAmount.plus(
@@ -264,14 +263,28 @@ export const analyzeTransactions = (
     });
 };
 
-export const getTxOperation = (transaction: WalletAccountTransaction) => {
-    if (transaction.type === 'sent' || transaction.type === 'self') {
+export const getTxOperation = (tx: WalletAccountTransaction) => {
+    if (tx.type === 'sent' || tx.type === 'self' || tx.type === 'failed') {
         return 'neg';
     }
-    if (transaction.type === 'recv') {
+    if (tx.type === 'recv') {
         return 'pos';
     }
     return null;
+};
+
+export const getTxIcon = (txType: WalletAccountTransaction['type']) => {
+    switch (txType) {
+        case 'recv':
+            return 'RECEIVE';
+        case 'sent':
+        case 'self':
+            return 'SEND';
+        case 'failed':
+            return 'WINDOW_CLOSE';
+        default:
+            return 'QUESTION';
+    }
 };
 
 export const getTargetAmount = (
@@ -301,13 +314,61 @@ export const isTxUnknown = (transaction: WalletAccountTransaction) => {
     );
 };
 
+export const isTxFailed = (tx: AccountTransaction | WalletAccountTransaction) => {
+    return !isPending(tx) && tx.ethereumSpecific?.status === 0;
+};
+
 export const getFeeRate = (tx: AccountTransaction, decimals?: number) => {
     // calculate fee rate, TODO: add this to blockchain-link tx details
     const fee = typeof decimals === 'number' ? amountToSatoshi(tx.fee, decimals) : tx.fee;
     return new BigNumber(fee).div(tx.details.size).integerValue(BigNumber.ROUND_CEIL).toString();
 };
 
-export const getRbfParams = (
+const getEthereumRbfParams = (
+    tx: AccountTransaction,
+    account: Account,
+): RbfTransactionParams | undefined => {
+    if (account.networkType !== 'ethereum') return;
+    if (tx.type === 'recv' || !tx.ethereumSpecific || !isPending(tx)) return; // ignore non rbf and mined transactions
+
+    const { vout } = tx.details;
+    const token = tx.tokens[0];
+
+    const output = token
+        ? {
+              address: token.to!,
+              token: token.address,
+              amount: token.amount,
+              formattedAmount: formatAmount(token.amount, token.decimals),
+          }
+        : {
+              address: vout[0].addresses![0],
+              amount: vout[0].value!,
+              formattedAmount: formatNetworkAmount(vout[0].value!, account.symbol),
+          };
+
+    const ethereumData =
+        tx.ethereumSpecific.data && tx.ethereumSpecific.data.indexOf('0x') === 0
+            ? tx.ethereumSpecific.data.substring(2)
+            : '';
+
+    return {
+        txid: tx.txid,
+        utxo: [], // irrelevant
+        outputs: [
+            {
+                type: 'payment',
+                ...output,
+            },
+        ],
+        ethereumNonce: tx.ethereumSpecific.nonce,
+        ethereumData,
+        feeRate: fromWei(tx.ethereumSpecific.gasPrice, 'gwei'),
+        baseFee: 0, // irrelevant
+    };
+};
+
+const getBitcoinRbfParams = (
     tx: AccountTransaction,
     account: Account,
 ): RbfTransactionParams | undefined => {
@@ -369,6 +430,41 @@ export const getRbfParams = (
     };
 };
 
+export const getRbfParams = (
+    tx: AccountTransaction,
+    account: Account,
+): WalletAccountTransaction['rbfParams'] => {
+    return getBitcoinRbfParams(tx, account) || getEthereumRbfParams(tx, account);
+};
+
+export const enhanceTransactionDetails = (tx: AccountTransaction, symbol: Account['symbol']) => ({
+    ...tx.details,
+    vin: tx.details.vin.map(v => ({
+        ...v,
+        value: v.value ? formatNetworkAmount(v.value, symbol) : v.value,
+    })),
+    vout: tx.details.vout.map(v => ({
+        ...v,
+        value: v.value ? formatNetworkAmount(v.value, symbol) : v.value,
+    })),
+    totalInput: formatNetworkAmount(tx.details.totalInput, symbol),
+    totalOutput: formatNetworkAmount(tx.details.totalOutput, symbol),
+});
+
+const enhanceFailedTransaction = (
+    tx: AccountTransaction,
+    _account: Account,
+): AccountTransaction => {
+    if (!isTxFailed(tx)) return tx;
+    // const address = tx.targets[0].addresses![0];
+    // TODO: find failed token in account.tokens list?
+    // TODO: try to parse smart contract data to get values (destination, amount..)
+    return {
+        ...tx,
+        type: 'failed',
+    };
+};
+
 /**
  * Formats amounts and attaches fields from the account (descriptor, deviceState, symbol) to the tx object
  *
@@ -377,9 +473,10 @@ export const getRbfParams = (
  * @returns {WalletAccountTransaction}
  */
 export const enhanceTransaction = (
-    tx: AccountTransaction,
+    origTx: AccountTransaction,
     account: Account,
 ): WalletAccountTransaction => {
+    const tx = enhanceFailedTransaction(origTx, account);
     return {
         descriptor: account.descriptor,
         deviceState: account.deviceState,
@@ -398,6 +495,7 @@ export const enhanceTransaction = (
         }),
         amount: formatNetworkAmount(tx.amount, account.symbol),
         fee: formatNetworkAmount(tx.fee, account.symbol),
+        totalSpent: formatNetworkAmount(tx.totalSpent, account.symbol),
         targets: tx.targets.map(tr => {
             if (typeof tr.amount === 'string') {
                 return {
@@ -408,6 +506,13 @@ export const enhanceTransaction = (
             return tr;
         }),
         rbfParams: getRbfParams(tx, account),
+        details: enhanceTransactionDetails(tx, account.symbol),
+        ethereumSpecific: tx.ethereumSpecific
+            ? {
+                  ...tx.ethereumSpecific,
+                  gasPrice: fromWei(tx.ethereumSpecific.gasPrice, 'gwei'),
+              }
+            : undefined,
     };
 };
 
@@ -481,7 +586,11 @@ const numberSearchFilter = (
     amount: BigNumber,
     operator: typeof searchOperators[number],
 ) => {
-    const targetAmount = getTargetAmount(transaction.targets[0], transaction);
+    const targetAmount =
+        transaction.targets[0] !== undefined
+            ? getTargetAmount(transaction.targets[0], transaction)
+            : transaction.amount;
+
     if (!targetAmount) {
         return false;
     }
@@ -576,7 +685,8 @@ export const simpleSearchTransactions = (
     // Searching for an amount (without operator)
     if (!Number.isNaN(search)) {
         const foundTxsForNumber = transactions.flatMap(t => {
-            const targetAmount = getTargetAmount(t.targets[0], t);
+            const targetAmount =
+                t.targets[0] !== undefined ? getTargetAmount(t.targets[0], t) : t.amount;
             if (!targetAmount || !targetAmount.includes(search)) {
                 return [];
             }

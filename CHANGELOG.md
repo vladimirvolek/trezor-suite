@@ -1,13 +1,66 @@
 # Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). [YY.MM.MICRO]
 
-## 21.1.0 [to be released Jan 13th]
+## 21.4.0 [to be released 14th April 2021]
 
 ### Added
 
 ### Changed
 
 ### Fixed
+
+## 21.3.1 [to be released 10th March 2021]
+
+### Added
+- Discovery progress bar in electron
+- OpenGraph meta tags for Suite (web version)
+- Option to hide dashboard graph
+- Instructions for verifying linux binary (landing page)
+- Ethereum replace-by-fee feature
+
+### Changed
+- Don't allow to run multiple instances of Suite desktop app
+
+### Fixed
+- Check if IDB is supported before each operation (no idb support in FF incognito/tor browser)
+- Account with non-zero balance could be marked as empty (eth)
+- OpenGraph meta tags for Suite landing page
+- Incorrect fiat rates for tokens sharing the same symbol
+- Include tokens in portfolio value showed on the Dashboard
+- Potential crash when switching active wallet in Send form
+- Upgrading idb between releases should not lead to "Loading takes too long" error
+- Browser icons in non-supported browser fallback page
+
+## 21.2.3 [17th February 2021]
+
+### Added
+- Pagination on transaction list
+
+### Fixed
+- Freeze when using transaction search while discovery is running
+- Fix exchange between eth and tokens
+- Correctly estimate Gas price for ERC20 tokens
+
+## 21.2.2 [10th February 2021]
+
+### Fixed
+- Device in bootloader not recognized on Windows due to Bridge v2.0.30 (replaced by 2.0.27)
+
+## 21.2.1 [10th February 2021]
+
+### Added
+
+- RBF with on-device support
+- Transaction search
+- Spend crypto through Bitrefill vouchers
+- Option to add custom ERC20 tokens
+- Custom fee in ETH
+
+### Changed
+- Redesigned review and send transaction modal
+
+### Fixed
+- M1 Mac compatibility
 
 ## 20.12.1 [9th December 2020]
 

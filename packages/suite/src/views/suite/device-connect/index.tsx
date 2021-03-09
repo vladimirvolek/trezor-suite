@@ -54,7 +54,7 @@ const Index = (props: Props) => {
     const [imageLoaded, setImageLoaded] = useState(false);
 
     return (
-        <Modal data-test="@modal/connect-device">
+        <Modal data-test="@modal/connect-device" centerContent>
             <HelpBuyIcons showBuy showHelp />
             <Title>
                 <H2>
@@ -85,6 +85,7 @@ const Index = (props: Props) => {
                                         onClick={() =>
                                             props.goto('suite-udev', { cancelable: true })
                                         }
+                                        data-test="@modal/connect-device/goto/suite-udev"
                                     >
                                         Udev rules
                                     </StyledLink>
@@ -105,6 +106,7 @@ const Index = (props: Props) => {
                                         onClick={() =>
                                             props.goto('suite-bridge', { cancelable: true })
                                         }
+                                        data-test="@modal/connect-device/goto/suite-bridge"
                                     >
                                         Trezor Bridge
                                     </StyledLink>

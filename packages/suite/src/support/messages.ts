@@ -2508,6 +2508,10 @@ const definedMessages = defineMessages({
         defaultMessage: 'Unknown transaction',
         id: 'TR_UNKNOWN_TRANSACTION',
     },
+    TR_FAILED_TRANSACTION: {
+        defaultMessage: 'Failed transaction',
+        id: 'TR_FAILED_TRANSACTION',
+    },
     TR_UNKNOWN_ERROR_SEE_CONSOLE: {
         defaultMessage: 'Unknown error. See console logs for details.',
         id: 'TR_UNKNOWN_ERROR_SEE_CONSOLE',
@@ -2727,6 +2731,14 @@ const definedMessages = defineMessages({
     TR_GAS_LIMIT: {
         id: 'TR_GAS_LIMIT',
         defaultMessage: 'Gas limit',
+    },
+    TR_GAS_USED: {
+        id: 'TR_GAS_USED',
+        defaultMessage: 'Gas used',
+    },
+    TR_NONCE: {
+        id: 'TR_NONCE',
+        defaultMessage: 'Nonce',
     },
     TR_SEND_GAS_LIMIT_TOOLTIP: {
         id: 'TR_SEND_GAS_LIMIT_TOOLTIP',
@@ -3193,6 +3205,10 @@ const definedMessages = defineMessages({
         id: 'FW_CAPABILITY_NO_CAPABILITY',
         defaultMessage: 'Not supported',
         description: 'Firmware with missing capability (eg: LTC on Bitcoin-only FW, XRP on T1...)',
+    },
+    FW_CAPABILITY_SUPPORTED_IN_T2: {
+        id: 'FW_CAPABILITY_SUPPORTED_IN_T2',
+        defaultMessage: 'Coin is supported only on Trezor Model T',
     },
     FW_CAPABILITY_NO_CAPABILITY_DESC: {
         id: 'FW_CAPABILITY_NO_CAPABILITY_DESC',
@@ -3684,7 +3700,7 @@ const definedMessages = defineMessages({
     },
     TR_VERSION: {
         id: 'TR_VERSION',
-        defaultMessage: 'version',
+        defaultMessage: 'Version {version}',
     },
     TR_BTC_ONLY_LABEL: {
         id: 'TR_BTC_ONLY_LABEL',
@@ -4274,7 +4290,7 @@ const definedMessages = defineMessages({
     },
     TR_ADD_TOKEN_TOOLTIP: {
         id: 'TR_ADD_TOKEN_TOOLTIP',
-        defaultMessage: 'Enter an ERC20 token contract addrress',
+        defaultMessage: 'Enter an ERC20 token contract address',
     },
     TR_ADD_TOKEN_ADDRESS_NOT_VALID: {
         id: 'TR_ADD_TOKEN_ADDRESS_NOT_VALID',
@@ -5214,6 +5230,10 @@ const definedMessages = defineMessages({
         id: 'TR_SUITE_WEB_LANDING_SIGNATURE',
         defaultMessage: 'Signature',
     },
+    TR_SUITE_WEB_LANDING_HOW_TO_VERIFY: {
+        id: 'TR_SUITE_WEB_LANDING_HOW_TO_VERIFY',
+        defaultMessage: 'How to verify and run on Linux',
+    },
     TR_DARK_MODE: {
         id: 'TR_DARK_MODE',
         defaultMessage: 'Dark mode',
@@ -5391,6 +5411,32 @@ const definedMessages = defineMessages({
     TR_BYTES: {
         id: 'TR_BYTES',
         defaultMessage: 'bytes',
+    },
+    TR_SHOW_GRAPH: {
+        id: 'TR_SHOW_GRAPH',
+        defaultMessage: 'Show Graph',
+    },
+    TR_HIDE_GRAPH: {
+        id: 'TR_HIDE_GRAPH',
+        defaultMessage: 'Hide Graph',
+    },
+    TR_SUITE_META_DESCRIPTION: {
+        id: 'TR_SUITE_META_DESCRIPTION',
+        defaultMessage:
+            'New desktop & browser app for Trezor hardware wallets. Trezor Suite brings big improvements across our three key pillars of usability, security and privacy.',
+    },
+    TR_DATABASE_UPGRADE_BLOCKED: {
+        id: 'TR_DATABASE_UPGRADE_BLOCKED',
+        defaultMessage: 'Database upgrade blocked by another app instance',
+    },
+    TR_THIS_INSTANCE_IS_BLOCKING: {
+        id: 'TR_THIS_INSTANCE_IS_BLOCKING',
+        defaultMessage: 'This instance is blocking a database upgrade',
+    },
+    TR_RUNNING_MULTIPLE_INSTANCES: {
+        id: 'TR_RUNNING_MULTIPLE_INSTANCES',
+        defaultMessage:
+            'It seems you are running multiple instances of the app. If you are using Suite in other window or tab, close it and refresh the app.',
     },
 } as const);
 

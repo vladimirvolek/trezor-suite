@@ -16,7 +16,17 @@ describe('Firmware', () => {
         cy.getTestElement('@notification/update-firmware/button').click();
 
         // initial screen
-        cy.getTestElement('@firmware').matchImageSnapshot('initial');
+        // to make screenshots stable, make changelog fixed height
+        cy.getTestElement('@firmware/initial/changelog').invoke('css', 'height', '300px')
+        cy.getTestElement('@firmware')
+            .matchImageSnapshot('initial', {
+                // to make screenshot test stable we need to blackout all parts that change expectedly
+                blackout: [
+                    '[data-test="@firmware/initial/changelog"]',
+                    '[data-test="@firmware/initial/heading/version"]',
+                    '[data-test="@firmware/initial/subheading/version"]',
+                ]
+            });
         cy.getTestElement('@firmware/continue-button').click();
 
         // check seed screen
@@ -46,7 +56,7 @@ describe('Firmware', () => {
         cy.prefixedVisit('/settings/device');
         cy.passThroughInitialRun();
         cy.getTestElement('@settings/device/update-button')
-            .should('contain.text', 'Up to date')
+            .should('contain.text', 'Up to date') // TODO: don't depend on actual text on the button, instead each button should have different data-test attr
             .click();
         cy.getTestElement('@modal/close-button').click();
     });

@@ -22,6 +22,8 @@ interface Flags {
     // passphraseCompleted: boolean;
     discreetModeCompleted: boolean;
     bech32BannerClosed: boolean;
+    securityStepsHidden: boolean;
+    dashboardGraphHidden: boolean;
 }
 
 interface SuiteSettings {
@@ -39,7 +41,8 @@ export interface SuiteState {
     tor: boolean;
     loading: boolean;
     loaded: boolean;
-    error?: string;
+    error?: string; // errors set from connect, should be renamed
+    dbError?: 'blocking' | 'blocked' | undefined; // blocked if the instance cannot upgrade due to older version running, blocking in case instance is running older version thus blocking other instance
     transport?: Partial<TransportInfo>;
     device?: TrezorDevice;
     messages: { [key: string]: any };
@@ -64,6 +67,8 @@ const initialState: SuiteState = {
         // passphraseCompleted: false;
         discreetModeCompleted: false,
         bech32BannerClosed: false,
+        securityStepsHidden: false,
+        dashboardGraphHidden: false,
     },
     settings: {
         theme: {
@@ -114,6 +119,12 @@ const suiteReducer = (state: SuiteState = initialState, action: Action): SuiteSt
                 draft.loading = false;
                 draft.loaded = false;
                 draft.error = action.error;
+                break;
+
+            case SUITE.SET_DB_ERROR:
+                draft.loading = false;
+                draft.loaded = false;
+                draft.dbError = action.payload;
                 break;
 
             case SUITE.SELECT_DEVICE:

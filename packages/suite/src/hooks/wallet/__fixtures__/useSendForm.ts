@@ -901,13 +901,13 @@ export const setMax = [
             composedLevels: {
                 normal: {
                     type: 'final',
-                    fee: '69300000000000',
+                    fee: '63000000000000',
                     totalSpent: '10000000000000000000',
                 },
                 custom: undefined,
             },
             formValues: {
-                outputs: [{ amount: '9.9999307', fiat: '10.00' }],
+                outputs: [{ amount: '9.999937', fiat: '10.00' }],
             },
         },
     },
@@ -933,7 +933,7 @@ export const setMax = [
             composedLevels: {
                 normal: {
                     type: 'final',
-                    fee: '69300000000000',
+                    fee: '63000000000000',
                     totalSpent: '1000', // tokens
                 },
                 custom: undefined,
@@ -1568,7 +1568,7 @@ export const feeChange = [
                     estimateFeeCalls: 1,
                     formValues: {
                         selectedFee: 'custom' as const,
-                        feePerUnit: '3.3',
+                        feePerUnit: '3',
                         feeLimit: '21000', // default
                         estimatedFeeLimit: undefined,
                     },
@@ -1582,8 +1582,23 @@ export const feeChange = [
                     estimateFeeCalls: 2,
                     formValues: {
                         outputs: [{ amount: '1.1' }],
-                        feePerUnit: '3.3',
-                        feeLimit: '21000',
+                        feePerUnit: '3',
+                        feeLimit: '41000', // feeLimit is switched automatically
+                        estimatedFeeLimit: '41000',
+                    },
+                },
+            },
+            // trigger "gas limit below recommended" error
+            {
+                type: 'input',
+                element: 'feeLimit',
+                value: '{backspace}',
+                result: {
+                    estimateFeeCalls: 2,
+                    formValues: {
+                        outputs: [{ amount: '1.1' }],
+                        feePerUnit: '3',
+                        feeLimit: '4100',
                         estimatedFeeLimit: '41000',
                     },
                     errors: {
@@ -1596,14 +1611,14 @@ export const feeChange = [
             {
                 type: 'input',
                 element: 'feeLimit',
-                value: '1',
+                value: '0',
                 result: {
                     estimateFeeCalls: 3,
                     formValues: {
                         outputs: [{ amount: '1.1' }],
                         selectedFee: 'custom' as const,
-                        feePerUnit: '3.3',
-                        feeLimit: '210001',
+                        feePerUnit: '3',
+                        feeLimit: '21009', // feeLimit is switched automatically again
                         estimatedFeeLimit: '21009',
                     },
                     composedLevels: {
@@ -1614,7 +1629,7 @@ export const feeChange = [
                         },
                         custom: {
                             type: 'final',
-                            feeLimit: '210001', // custom composed tx with higher level
+                            feeLimit: '41000', // custom composed tx with higher level (as requested)
                             estimatedFeeLimit: '21009',
                         },
                     },
@@ -1660,7 +1675,7 @@ export const feeChange = [
                 result: {
                     formValues: {
                         selectedFee: 'custom' as const,
-                        feePerUnit: '3.3',
+                        feePerUnit: '3',
                         feeLimit: '21a',
                         estimatedFeeLimit: '21009',
                     },
@@ -1692,8 +1707,8 @@ export const feeChange = [
                     composedLevels: {
                         normal: {
                             type: 'final',
-                            fee: '69300000000000',
-                            feePerByte: '3.3',
+                            fee: '63000000000000',
+                            feePerByte: '3',
                             feeLimit: '21000', // default
                         },
                         custom: undefined, // no custom level build

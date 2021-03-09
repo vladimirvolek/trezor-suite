@@ -1,5 +1,4 @@
 import { db } from '@suite/storage';
-import SuiteDB from '@trezor/suite-storage';
 import { STORAGE } from './constants';
 import { Dispatch, GetState, AppState, TrezorDevice } from '@suite-types';
 import { Account } from '@wallet-types';
@@ -18,18 +17,26 @@ export type StorageAction =
     | { type: typeof STORAGE.LOADED; payload: AppState }
     | { type: typeof STORAGE.ERROR; error: any };
 
-// send form drafts start
+const isDBAccessible = async () => {
+    const isSupported = await db.isSupported();
+    // if the instance is blocking db upgrade, db connection will be closed
+    return isSupported && !db.blocking && !db.blocked;
+};
 
-export const saveDraft = (formState: FormState, accountKey: string) => {
+// send form drafts start
+export const saveDraft = async (formState: FormState, accountKey: string) => {
+    if (!(await isDBAccessible())) return;
     return db.addItem('sendFormDrafts', formState, accountKey, true);
 };
 
-export const removeDraft = (accountKey: string) => {
+export const removeDraft = async (accountKey: string) => {
+    if (!(await isDBAccessible())) return;
     return db.removeItemByPK('sendFormDrafts', accountKey);
 };
 
 // eslint-disable-next-line require-await
 export const saveAccountDraft = (account: Account) => async (_: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
     const { drafts } = getState().wallet.send;
     const draft = drafts[account.key];
     if (draft) {
@@ -37,22 +44,26 @@ export const saveAccountDraft = (account: Account) => async (_: Dispatch, getSta
     }
 };
 
-export const removeAccountDraft = (account: Account) => {
+export const removeAccountDraft = async (account: Account) => {
+    if (!(await isDBAccessible())) return Promise.resolve();
     return db.removeItemByPK('sendFormDrafts', account.key);
 };
 
 // send form drafts end
 
-export const saveDevice = (device: TrezorDevice, forceRemember?: true) => {
+export const saveDevice = async (device: TrezorDevice, forceRemember?: true) => {
+    if (!(await isDBAccessible())) return;
     if (!device || !device.features || !device.state) return;
     return db.addItem('devices', serializeDevice(device, forceRemember), device.state, true);
 };
 
-export const removeAccount = (account: Account) => {
+export const removeAccount = async (account: Account) => {
+    if (!(await isDBAccessible())) return;
     return db.removeItemByPK('accounts', [account.descriptor, account.symbol, account.deviceState]);
 };
 
 export const removeAccountTransactions = async (account: Account) => {
+    if (!(await isDBAccessible())) return;
     await db.removeItemByIndex('txs', 'accountKey', [
         account.descriptor,
         account.symbol,
@@ -61,6 +72,7 @@ export const removeAccountTransactions = async (account: Account) => {
 };
 
 export const forgetDevice = (device: TrezorDevice) => async (_: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
     if (!device.state) return;
     const accounts = getState().wallet.accounts.filter(a => a.deviceState === device.state);
     const accountPromises = accounts.reduce((promises, account) => {
@@ -77,7 +89,8 @@ export const forgetDevice = (device: TrezorDevice) => async (_: Dispatch, getSta
     return promises;
 };
 
-export const saveAccounts = (accounts: Account[]) => {
+export const saveAccounts = async (accounts: Account[]) => {
+    if (!(await isDBAccessible())) return;
     return db.addItems('accounts', accounts, true);
 };
 
@@ -88,7 +101,8 @@ interface AccountPart {
     descriptor: Account['descriptor'];
 }
 
-export const saveBuyTrade = (buyTrade: BuyTrade, account: AccountPart, date: string) => {
+export const saveBuyTrade = async (buyTrade: BuyTrade, account: AccountPart, date: string) => {
+    if (!(await isDBAccessible())) return;
     return db.addItem(
         'coinmarketTrades',
         {
@@ -108,11 +122,12 @@ export const saveBuyTrade = (buyTrade: BuyTrade, account: AccountPart, date: str
     );
 };
 
-export const saveExchangeTrade = (
+export const saveExchangeTrade = async (
     exchangeTrade: ExchangeTrade,
     account: AccountPart,
     date: string,
 ) => {
+    if (!(await isDBAccessible())) return;
     return db.addItem(
         'coinmarketTrades',
         {
@@ -132,18 +147,21 @@ export const saveExchangeTrade = (
     );
 };
 
-export const saveDiscovery = (discoveries: Discovery[]) => {
+export const saveDiscovery = async (discoveries: Discovery[]) => {
+    if (!(await isDBAccessible())) return;
     return db.addItems('discovery', discoveries, true);
 };
 
-export const saveGraph = (graphData: GraphData[]) => {
+export const saveGraph = async (graphData: GraphData[]) => {
+    if (!(await isDBAccessible())) return;
     return db.addItems('graph', graphData, true);
 };
 
-export const saveAccountTransactions = (account: Account) => (
+export const saveAccountTransactions = (account: Account) => async (
     _dispatch: Dispatch,
     getState: GetState,
 ) => {
+    if (!(await isDBAccessible())) return Promise.resolve();
     const allTxs = getState().wallet.transactions.transactions;
     const accTxs = allTxs[account.key] || [];
 
@@ -157,7 +175,8 @@ export const saveAccountTransactions = (account: Account) => (
     return db.addItems('txs', orderedTxs, true);
 };
 
-export const removeAccountGraph = (account: Account) => {
+export const removeAccountGraph = async (account: Account) => {
+    if (!(await isDBAccessible())) return;
     return db.removeItemByIndex('graph', 'accountKey', [
         account.descriptor,
         account.symbol,
@@ -170,6 +189,7 @@ export const rememberDevice = (
     remember: boolean,
     forcedRemember?: true,
 ) => async (dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
     if (!device || !device.features || !device.state) return;
     if (!remember) {
         return dispatch(forgetDevice(device));
@@ -203,6 +223,7 @@ export const rememberDevice = (
 };
 
 export const saveWalletSettings = () => async (_dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
     await db.addItem(
         'walletSettings',
         {
@@ -213,17 +234,26 @@ export const saveWalletSettings = () => async (_dispatch: Dispatch, getState: Ge
     );
 };
 
-export const removeFiatRate = (symbol: string) => (_dispatch: Dispatch, _getState: GetState) => {
-    // TODO: just to be safe store and delete by compound index [symbol, mainNetworkSymbol]
-    // check if it's fine to have mainNetworkSymbol undefined
-    return db.removeItemByPK('fiatRates', symbol);
+export const removeFiatRate = (symbol: string, tokenAddress?: string) => async (
+    _dispatch: Dispatch,
+    _getState: GetState,
+) => {
+    if (!(await isDBAccessible())) return;
+    const key = tokenAddress ? `${symbol}-${tokenAddress}` : symbol;
+    return db.removeItemByPK('fiatRates', key);
 };
 
-export const saveFiatRates = () => (_dispatch: Dispatch, getState: GetState) => {
-    return db.addItems('fiatRates', getState().wallet.fiat.coins, true);
+export const saveFiatRates = () => async (_dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
+    const promises = getState().wallet.fiat.coins.map(c => {
+        const key = c.tokenAddress ? `${c.symbol}-${c.tokenAddress}` : c.symbol;
+        return db.addItem('fiatRates', c, key, true);
+    });
+    return Promise.all(promises);
 };
 
-export const saveSuiteSettings = () => (_dispatch: Dispatch, getState: GetState) => {
+export const saveSuiteSettings = () => async (_dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
     const { suite } = getState();
     db.addItem(
         'suiteSettings',
@@ -236,6 +266,8 @@ export const saveSuiteSettings = () => (_dispatch: Dispatch, getState: GetState)
                 // TODO: maybe spread all flags and set flags that we don't want to save to undefined?
                 discreetModeCompleted: suite.flags.discreetModeCompleted,
                 bech32BannerClosed: suite.flags.bech32BannerClosed,
+                securityStepsHidden: suite.flags.securityStepsHidden,
+                dashboardGraphHidden: suite.flags.dashboardGraphHidden,
             },
         },
         'suite',
@@ -243,7 +275,9 @@ export const saveSuiteSettings = () => (_dispatch: Dispatch, getState: GetState)
     );
 };
 
-export const saveAnalytics = () => (_dispatch: Dispatch, getState: GetState) => {
+export const saveAnalytics = () => async (_dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
+
     const { analytics } = getState();
     db.addItem(
         'analytics',
@@ -259,7 +293,9 @@ export const saveAnalytics = () => (_dispatch: Dispatch, getState: GetState) => 
 /**
  * save general metadata settings
  */
-export const saveMetadata = () => (_dispatch: Dispatch, getState: GetState) => {
+export const saveMetadata = () => async (_dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
+
     const { metadata } = getState();
     db.addItem(
         'metadata',
@@ -270,6 +306,8 @@ export const saveMetadata = () => (_dispatch: Dispatch, getState: GetState) => {
 };
 
 export const removeDatabase = () => async (dispatch: Dispatch, getState: GetState) => {
+    if (!(await isDBAccessible())) return;
+
     const rememberedDevices = getState().devices.filter(d => d.remember);
     // forget all remembered devices
     rememberedDevices.forEach(d => {
@@ -283,15 +321,15 @@ export const removeDatabase = () => async (dispatch: Dispatch, getState: GetStat
     );
 };
 
-export const loadSuiteSettings = () => {
+export const loadSuiteSettings = async () => {
+    if (!(await isDBAccessible())) return;
     return db.getItemByPK('suiteSettings', 'suite');
 };
 
 export const loadStorage = () => async (dispatch: Dispatch, getState: GetState) => {
-    const isDBAvailable = await SuiteDB.isDBAvailable();
+    const isDBAvailable = await isDBAccessible();
 
     if (!isDBAvailable) {
-        // console.warn('IndexedDB not supported');
         const initialState = getState();
         dispatch({
             type: STORAGE.LOADED,
@@ -385,5 +423,15 @@ export const loadStorage = () => async (dispatch: Dispatch, getState: GetState) 
                 },
             },
         });
+    }
+};
+
+export const init = () => async (dispatch: Dispatch) => {
+    // should be called only once
+    if (await isDBAccessible()) {
+        // set callbacks that are fired when upgrading the db is blocked because of multiple instances are running
+        db.onBlocked = () => dispatch(suiteActions.setDbError('blocked'));
+        db.onBlocking = () => dispatch(suiteActions.setDbError('blocking'));
+        await db.getDB();
     }
 };

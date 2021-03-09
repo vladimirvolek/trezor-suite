@@ -63,21 +63,16 @@ export interface Transaction {
     blockTime?: number;
     blockHeight?: number;
     blockHash?: string;
+    lockTime?: number;
 
     amount: string;
     fee: string;
-    // total: string, // amount + total
+    totalSpent: string; // amount + total
 
     targets: Target[];
     tokens: TokenTransfer[];
     rbf?: boolean;
-    ethereumSpecific?: {
-        status: number;
-        nonce: number;
-        gasLimit: number;
-        gasUsed?: number;
-        gasPrice: string;
-    };
+    ethereumSpecific?: BlockbookTransaction['ethereumSpecific'];
     details: TransactionDetail;
 }
 

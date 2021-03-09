@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { FormattedDate } from 'react-intl';
-import { Translation } from '@suite-components';
+import { Translation, FormattedDate } from '@suite-components';
 import { TooltipProps } from 'recharts';
 import { getDateWithTimeZone } from '@suite/utils/suite/date';
 import { CommonAggregatedHistory } from '@wallet-types/graph';
-import { Props as GraphProps } from '../../index';
+import { Props as GraphProps } from '../../definitions';
 
 // Used for triggering custom Tooltip alignment
 const OFFSET_LIMIT_HORIZONTAL = 125;
@@ -124,9 +123,9 @@ interface Props extends TooltipProps {
 
 const formatDate = (date: Date, dateFormat: 'day' | 'month') => {
     if (dateFormat === 'day') {
-        return <FormattedDate value={date} year="numeric" month="long" day="2-digit" />;
+        return <FormattedDate value={date} date month="long" />;
     }
-    return <FormattedDate value={date} year="numeric" month="long" />;
+    return <FormattedDate value={date} date day={undefined} />;
 };
 
 const CustomTooltipBase = (props: Props) => {

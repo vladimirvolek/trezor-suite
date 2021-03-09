@@ -3,12 +3,12 @@ import url from 'url';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 
-import { PROTOCOL } from '@lib/constants';
-import * as store from '@lib/store';
-import { MIN_HEIGHT, MIN_WIDTH } from '@lib/screen';
-import Logger, { LogLevel, defaultOptions as loggerDefaults } from '@lib/logger';
-import { buildInfo, computerInfo } from '@lib/info';
-import modules from '@lib/modules';
+import { PROTOCOL } from '@desktop-electron/libs/constants';
+import * as store from '@desktop-electron/libs/store';
+import { MIN_HEIGHT, MIN_WIDTH } from '@desktop-electron/libs/screen';
+import Logger, { LogLevel, defaultOptions as loggerDefaults } from '@desktop-electron/libs/logger';
+import { buildInfo, computerInfo } from '@desktop-electron/libs/info';
+import modules from '@desktop-electron/libs/modules';
 
 let mainWindow: BrowserWindow;
 const APP_NAME = 'Trezor Suite';
@@ -77,8 +77,25 @@ const init = async () => {
     });
 };
 
-app.name = APP_NAME; // overrides @trezor/suite-desktop app name in menu
-app.on('ready', init);
+// https://www.electronjs.org/docs/all#apprequestsingleinstancelock
+const singleInstance = app.requestSingleInstanceLock();
+if (!singleInstance) {
+    logger.warn('main', 'Second instance detected, quitting...');
+    app.quit();
+} else {
+    logger.info('main', 'Application starting');
+
+    app.on('second-instance', () => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+        }
+    });
+
+    app.name = APP_NAME; // overrides @trezor/suite-desktop app name in menu
+    app.on('ready', init);
+}
 
 app.on('before-quit', () => {
     if (!mainWindow) return;

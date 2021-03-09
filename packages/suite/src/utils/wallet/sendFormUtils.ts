@@ -5,7 +5,7 @@ import Common from 'ethereumjs-common';
 import { Transaction, TxData } from 'ethereumjs-tx';
 import { fromWei, padLeft, toHex, toWei } from 'web3-utils';
 import { ERC20_TRANSFER } from '@wallet-constants/sendForm';
-import { amountToSatoshi, networkAmountToSatoshi } from '@wallet-utils/accountUtils';
+import { amountToSatoshi, networkAmountToSatoshi, formatAmount } from '@wallet-utils/accountUtils';
 import { Network, Account, CoinFiatRates } from '@wallet-types';
 import { FormState, FeeInfo, EthTransactionData, ExternalOutput } from '@wallet-types/sendForm';
 
@@ -26,10 +26,11 @@ export const calculateTotal = (amount: string, fee: string): string => {
 export const calculateMax = (availableBalance: string, fee: string): string => {
     try {
         const max = new BigNumber(availableBalance).minus(fee);
-        if (max.isNaN() || max.isLessThan(0)) {
+        if (max.isNaN()) {
             console.error('calculateMax: Amount is not a number', availableBalance, fee);
             return '0';
         }
+        if (max.isLessThan(0)) return '0';
         return max.toFixed();
     } catch (error) {
         console.error('calculateMax: error', error);
@@ -76,6 +77,9 @@ const getSerializedErc20Transfer = (token: TokenInfo, to: string, amount: string
     return `0x${ERC20_TRANSFER}${erc20recipient}${erc20amount}`;
 };
 
+// TrezorConnect.blockchainEstimateFee for ethereum
+// NOTE:
+// - amount cannot be "0" (send max calculation), use at least 1 unit.
 export const getEthereumEstimateFeeParams = (
     to: string,
     token?: TokenInfo,
@@ -84,9 +88,13 @@ export const getEthereumEstimateFeeParams = (
 ) => {
     if (token) {
         return {
-            to,
+            to: token.address,
             value: '0x0',
-            data: getSerializedErc20Transfer(token, to, amount || '0'),
+            data: getSerializedErc20Transfer(
+                token,
+                to,
+                amount || formatAmount('1', token.decimals), // use at least 1 smallest unit of token (satoshi)
+            ),
         };
     }
     return {
@@ -156,9 +164,12 @@ export const getFeeLevels = (networkType: Network['networkType'], feeInfo: FeeIn
     });
 
     if (networkType === 'ethereum') {
+        // convert wei to gwei and floor value to avoid decimals
         return levels.map(level => ({
             ...level,
-            feePerUnit: fromWei(level.feePerUnit, 'gwei'),
+            feePerUnit: new BigNumber(fromWei(level.feePerUnit, 'gwei'))
+                .integerValue(BigNumber.ROUND_FLOOR)
+                .toString(),
             feeLimit: level.feeLimit,
         }));
     }
