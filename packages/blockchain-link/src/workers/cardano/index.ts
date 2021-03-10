@@ -1,4 +1,5 @@
 import { BlockFrostAPI } from '@blockfrost/blockfrost-js';
+import { Utxo } from '../../types/responses';
 import { CustomError } from '../../constants/errors';
 import { MESSAGES, RESPONSES } from '../../constants';
 import * as MessageTypes from '../../types/messages';
@@ -67,18 +68,56 @@ const getTransaction = async (data: { id: any } & MessageTypes.GetTransaction): 
     }
 };
 
+const getAccountUtxo = async (
+    data: { id: number } & MessageTypes.GetAccountUtxo
+): Promise<void> => {
+    const { payload } = data;
+    try {
+        const blockFrostApi = getApi();
+        const result: Utxo[] = [];
+        const responseUtxo = await blockFrostApi.addressesUtxos(payload);
+
+        responseUtxo.forEach(async utxo => {
+            const lovelaceAmount = utxo.amount?.find(u => u.unit === 'lovelace');
+
+            if (utxo.block) {
+                const responseBlock = await blockFrostApi.blocks(utxo.block);
+                result.push({
+                    txid: utxo.tx_hash || '0',
+                    confirmations: responseBlock.confirmations,
+                    blockHeight: responseBlock.height || 0,
+                    address: '',
+                    path: '',
+                    amount: lovelaceAmount?.quantity || '0',
+                    vout: 0,
+                    coinbase: false,
+                });
+            }
+        });
+
+        common.response({
+            id: data.id,
+            type: RESPONSES.GET_ACCOUNT_UTXO,
+            payload: result,
+        });
+    } catch (error) {
+        common.errorHandler({ id: data.id, error });
+    }
+};
+
 onmessage = (event: { data: Message }) => {
     if (!event.data) return;
     const { data } = event;
     const { id, type } = data;
 
     common.debug('onmessage', data);
-    common.debug('onmessage', data.type);
-    common.debug('MESSAGES.GET_INFO', MESSAGES.GET_INFO);
 
     switch (data.type) {
         case MESSAGES.HANDSHAKE:
             common.setSettings(data.settings);
+            break;
+        case MESSAGES.GET_ACCOUNT_UTXO:
+            getAccountUtxo(data);
             break;
         case MESSAGES.GET_TRANSACTION:
             getTransaction(data);

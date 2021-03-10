@@ -437,5 +437,10 @@ export default [
             server: ['ws://localhost:3000'],
             debug: true,
         },
+        data: {
+            address:
+                'addr1q99hnk2vnx708l86mujpfs9end50em9s95grhe3v4933m259ckxhkvuc5xj49rw6zrp443wlygmhv8gwcu38jk6ms6usr7qlze',
+            txid: '28172ea876c3d1e691284e5179fae2feb3e69d7d41e43f8023dc380115741026',
+        },
     },
 ];

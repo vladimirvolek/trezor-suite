@@ -331,10 +331,18 @@ const init = (instances: any[]) => {
     accountInfoMode.onchange = onAccountInfoModeChange;
 };
 
+const getWorker = (worker: string) => {
+    if (worker.includes('ripple')) return RippleWorker;
+    if (worker.includes('blockbook')) return BlockbookWorker;
+    if (worker.includes('cardano')) return CardanoWorker;
+
+    throw Error('Cannot find the worker');
+};
+
 init(CONFIG);
 
 CONFIG.forEach(i => {
-    const worker: any = CardanoWorker;
+    const worker: any = getWorker(i.blockchain.worker);
     const b = new BlockchainLink({
         ...i.blockchain,
         worker,
