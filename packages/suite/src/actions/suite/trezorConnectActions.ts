@@ -11,7 +11,8 @@ import { Dispatch, GetState } from '@suite-types';
 import { isDesktop, isWeb } from '@suite-utils/env';
 import { toTorUrl } from '@suite-utils/tor';
 
-const CONNECT_URL = 'https://connect.trezor.io/8/';
+// const CONNECT_URL = 'https://connect.trezor.io/8/';
+const CONNECT_URL = 'https://localhost:8088/';
 
 export const init = () => async (dispatch: Dispatch, getState: GetState) => {
     // set event listeners and dispatch as

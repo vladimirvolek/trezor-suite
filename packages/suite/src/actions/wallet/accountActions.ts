@@ -120,6 +120,7 @@ export const fetchAndUpdateAccount = (account: Account) => async (
         descriptor: account.descriptor,
         details: 'basic',
     });
+
     if (!basic.success) return;
 
     const accountOutdated = accountUtils.isAccountOutdated(account, basic.payload);

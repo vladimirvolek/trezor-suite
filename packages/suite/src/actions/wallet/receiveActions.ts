@@ -102,6 +102,9 @@ export const showAddress = (path: string, address: string) => async (
         case 'bitcoin':
             fn = TrezorConnect.getAddress;
             break;
+        case 'cardano':
+            fn = TrezorConnect.cardanoGetAddress;
+            break;
         default:
             fn = () => ({
                 success: false,

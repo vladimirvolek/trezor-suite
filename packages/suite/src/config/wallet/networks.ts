@@ -86,6 +86,28 @@ const networks = [
         },
         features: ['sign-verify'],
     },
+    // Cardano
+    {
+        name: 'Cardano',
+        networkType: 'cardano',
+        symbol: 'ada',
+        bip44: "m/1852'/1815'/0'/0/i",
+        decimals: 6,
+        testnet: false,
+        explorer: {
+            tx: 'https://adastat.net/transactions/',
+            account: 'https://adastat.net/blocks/',
+        },
+    },
+    // {
+    //     name: 'Cardano (shelley)',
+    //     networkType: 'cardano',
+    //     accountType: 'legacy',
+    //     symbol: 'ada',
+    //     bip44: "m/44'/1815'/0'/0/i",
+    //     decimals: 6,
+    //     testnet: false,
+    // },
     {
         name: 'Ethereum Classic',
         networkType: 'ethereum',

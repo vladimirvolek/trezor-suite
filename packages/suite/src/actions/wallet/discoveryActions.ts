@@ -372,7 +372,7 @@ export const start = () => async (dispatch: Dispatch, getState: GetState): Promi
         // pass more parameters to handler
         dispatch(handleProgress(event, deviceState, bundle[progress], metadataEnabled));
     };
-
+    console.log('bundle', bundle);
     TrezorConnect.on<AccountInfo>(UI.BUNDLE_PROGRESS, onBundleProgress);
     const result = await TrezorConnect.getAccountInfo({
         device,
@@ -381,6 +381,8 @@ export const start = () => async (dispatch: Dispatch, getState: GetState): Promi
         skipFinalReload: true,
         useEmptyPassphrase: device.useEmptyPassphrase,
     });
+
+    console.log('result', result);
 
     TrezorConnect.off(UI.BUNDLE_PROGRESS, onBundleProgress);
 

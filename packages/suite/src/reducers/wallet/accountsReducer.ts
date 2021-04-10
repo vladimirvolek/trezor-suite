@@ -24,6 +24,9 @@ type AccountNetworkSpecific =
           misc: { nonce: string };
           marker: undefined;
           page: AccountInfo['page'];
+    }
+    |{
+          networkType: 'cardano';
       };
 
 export type Account = {

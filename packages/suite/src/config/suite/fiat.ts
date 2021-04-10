@@ -13,6 +13,7 @@ export default {
         { symbol: 'vtc', coingeckoId: 'vertcoin' },
         { symbol: 'nmc', coingeckoId: 'namecoin' },
         { symbol: 'zec', coingeckoId: 'zcash' },
+        { symbol: 'ada', coingeckoId: 'cardano' },
     ],
     currencies: [
         'usd',

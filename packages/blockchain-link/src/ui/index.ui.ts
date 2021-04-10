@@ -1,9 +1,9 @@
 // @ts-ignore no default export
-import BlockbookWorker from '../workers/blockbook/index';
+import BlockbookWorker from '../workers/blockbook';
 // @ts-ignore no default export
-import CardanoWorker from '../workers/cardano/index';
+import RippleWorker from '../workers/ripple';
 // @ts-ignore no default export
-import RippleWorker from '../workers/ripple/index';
+import CardanoWorker from '../workers/cardano';
 
 import CONFIG from './config';
 import BlockchainLink from '../index';
@@ -331,18 +331,10 @@ const init = (instances: any[]) => {
     accountInfoMode.onchange = onAccountInfoModeChange;
 };
 
-const getWorker = (worker: string) => {
-    if (worker.includes('ripple')) return RippleWorker;
-    if (worker.includes('blockbook')) return BlockbookWorker;
-    if (worker.includes('cardano')) return CardanoWorker;
-
-    throw Error('Cannot find the worker');
-};
-
 init(CONFIG);
 
 CONFIG.forEach(i => {
-    const worker: any = getWorker(i.blockchain.worker);
+    const worker: any = CardanoWorker;
     const b = new BlockchainLink({
         ...i.blockchain,
         worker,
